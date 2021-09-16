@@ -14,22 +14,24 @@ struct BarChart {
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar(Bar *series, char *chart, int x_offset)
+print_bar(Bar *series, char *chart, int x_offset, float scale)
 {
 	int height = HEIGHT - 1; //offset things
 	int y_offset = 1;
 	int name_len = strlen(get_name(series));
+	float scaled_height = (height - get_number(series)) * scale;
 
 	x_offset = (x_offset < 1) ? 1 : x_offset;
 	x_offset += name_len / 2;
 
 	int i = y_offset;
 	for (; i<height; ++i) {
-		if (i == HEIGHT - get_number(series)) {
+		/* print number on top of bar */
+		if (i == scaled_height) {
 			char *str = int2str(get_number(series));
 			strncpy(&chart[i * WIDTH + x_offset], str, strlen(str));
 		} else {
-			chart[i * WIDTH + x_offset] = (i > height - get_number(series)) ?
+			chart[i * WIDTH + x_offset] = (i > scaled_height) ?
 				BARBLOCK : BLANK;
 		}
 	}

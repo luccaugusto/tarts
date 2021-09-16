@@ -12,6 +12,6 @@ int get_number (Bar *series);
 char *get_name (Bar *series);
 void set_number (Bar *series, int number);
 void set_name (Bar *series, char *name);
-void print_bar(Bar *series, char *chart, int x_offset);
+void print_bar(Bar *series, char *chart, int x_offset, float scale);
 Bar *new_bar (int number, char *name);
 #endif

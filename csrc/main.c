@@ -1,6 +1,7 @@
 /* INCLUDES */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "constants.h"
 #include "bar_chart.h"
@@ -54,10 +55,19 @@ init_chart()
 int
 main()
 {
+	int x_offset = 2;
+	float scale = 50 / HEIGHT;
 	Bar *b1 = new_bar(25, "lucca");
+	Bar *b2 = new_bar(5, "luquinha");
+	Bar *b3 = new_bar(50, "luccão");
 	init_chart();
 	build_frame();
-	print_bar(b1, chart, 2);
-	show(get_name(b1));
+	print_bar(b1, chart, x_offset, scale);
+	x_offset += strlen(get_name(b1)) + 1;
+	print_bar(b2, chart, x_offset, scale);
+	x_offset += strlen(get_name(b2)) + 1;
+	print_bar(b3, chart, x_offset, scale);
+
+	show("TEST");
 	return 0;
 }
