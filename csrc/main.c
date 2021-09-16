@@ -45,7 +45,9 @@ show(char *title) {
 int
 main()
 {
+	Bar *b1 = new_bar(25, "lucca");
 	build_frame();
-	show("test");
+	print_bar(b1, &chart, 0);
+	show(get_name(b1));
 	return 0;
 }
