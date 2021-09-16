@@ -1,7 +1,7 @@
 #ifndef BAR_CHART_H
 #define BAR_CHART_H
 
-#define MAX_BARS ((WIDTH - MAX_NAME_LENGHT) / 3)
+#define MAX_BARS ((WIDTH - MAX_NAME_LENGTH) / 3)
 #define BARBLOCK '#'
 
 /* TYPES */

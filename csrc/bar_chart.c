@@ -7,7 +7,7 @@
 /* TYPES */
 struct BarChart {
 	int number;
-	char name[MAX_NAME_LENGHT];
+	char name[MAX_NAME_LENGTH];
 };
 
 /* FUNCTION DEFINITIONS */
@@ -53,16 +53,16 @@ set_number (Bar *series, int number)
 void
 set_name (Bar *series, char *name)
 {
-	int len = (strlen(name) > MAX_NAME_LENGHT) ?
-		MAX_NAME_LENGHT : strlen(name);
+	int len = (strlen(name) > MAX_NAME_LENGTH) ?
+		MAX_NAME_LENGTH : strlen(name);
 	strncpy(series->name, name, len);
 }
 
 struct BarChart *
 new_bar (int number, char *name)
 {
-	int len = (strlen(name) > MAX_NAME_LENGHT) ?
-		MAX_NAME_LENGHT : strlen(name);
+	int len = (strlen(name) > MAX_NAME_LENGTH) ?
+		MAX_NAME_LENGTH : strlen(name);
 
 	Bar *b = malloc(sizeof(Bar));
 	b->number = number;

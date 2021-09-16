@@ -8,6 +8,6 @@
 #define FRAME_BORDER_H '-'
 #define FRAME_BORDER_V '|'
 #define BLANK ' '
-#define MAX_NAME_LENGHT 50
+#define MAX_NAME_LENGTH 50
 
 #endif
