@@ -18,6 +18,7 @@ print_bar(Bar *series, char *chart, int x_offset)
 	int width = WIDTH;
 	int height = HEIGHT;
 	int y_offset = 0;
+	int name_len = strlen(get_name(series));
 
 	if (FRAMED) {
 		width -= 2;
@@ -26,10 +27,15 @@ print_bar(Bar *series, char *chart, int x_offset)
 		x_offset = (x_offset < 1) ? x_offset + 1 : x_offset;
 	}
 
-	for (int i=y_offset; i<height; ++i) {
+	x_offset += name_len / 2;
+
+	int i = y_offset;
+	for (; i<height; ++i) {
 		chart[i * WIDTH + x_offset] = (i > height - get_number(series)) ?
 			BARBLOCK : BLANK;
 	}
+
+	strncpy(&chart[i * WIDTH + x_offset - name_len/2], get_name(series), name_len);
 }
 
 int
