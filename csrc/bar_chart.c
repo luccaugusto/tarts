@@ -15,18 +15,12 @@ struct BarChart {
 void
 print_bar(Bar *series, char *chart, int x_offset)
 {
-	int width = WIDTH;
-	int height = HEIGHT;
-	int y_offset = 0;
+	int width = WIDTH - 2; //offset things
+	int height = HEIGHT - 1; //offset things
+	int y_offset = 1;
 	int name_len = strlen(get_name(series));
 
-	if (FRAMED) {
-		width -= 2;
-		height -= 1;
-		y_offset = 1;
-		x_offset = (x_offset < 1) ? x_offset + 1 : x_offset;
-	}
-
+	x_offset = (x_offset < 1) ? 1 : x_offset;
 	x_offset += name_len / 2;
 
 	int i = y_offset;

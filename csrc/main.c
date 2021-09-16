@@ -42,12 +42,22 @@ show(char *title) {
 		printf("%.*s\n", WIDTH, &chart[i * WIDTH] );
 }
 
+void
+init_chart()
+{
+	char *p = chart;
+	int n = HEIGHT * WIDTH;
+
+	while (n--) *p++ = BLANK;
+}
+
 int
 main()
 {
 	Bar *b1 = new_bar(25, "lucca");
+	init_chart();
 	build_frame();
-	print_bar(b1, chart, 0);
+	print_bar(b1, chart, 2);
 	show(get_name(b1));
 	return 0;
 }
