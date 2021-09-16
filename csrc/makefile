@@ -25,7 +25,7 @@ RM=rm -rf
 
 C_SRC=${wildcard ./*.c}
 H_SRC=${wildcard ./*.h}
-OBJ=${subst .c,.o,${subst src,build,${C_SRC}}}
+OBJ=${subst .c,.o,${subst ./,./build/,${C_SRC}}}
 
 all: options BD_DIR ${PROJ_NAME}
 
@@ -45,14 +45,14 @@ ${PROJ_NAME}: ${OBJ}
 
 config:
 	@echo "config"
-	cp ./src/config.def.h ./src/$@.h
+	cp ./config.def.h ./$@.h
 	@echo
 
-./build/%.o: ./src/%.c ./src/%.h
+./build/%.o: ./%.c ./%.h
 	@echo "[${CC}] $<"
 	@ ${CC} $< -c ${CFLAGS} -o $@
 
-./build/main.o: ./src/main.c ${H_SRC}
+./build/main.o: ./main.c ${H_SRC}
 	@echo "[${CC}] $<"
 	@ ${CC} $< -c ${CFLAGS} -o $@
 
@@ -74,7 +74,7 @@ uninstall:
 		${DESTDIR}${MANPREFIX}/man1/${PROJ_NAME}.1
 
 clean:
-	${RM} ${PROJ_NAME} ./build ./src/config.h
+	${RM} ${PROJ_NAME} ./build ./config.h
 
 run:
 	./${PROJ_NAME}
