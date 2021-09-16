@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include "bar_chart.h"
+#include "utils.h"
 
 /* TYPES */
 struct BarChart {
@@ -15,7 +16,6 @@ struct BarChart {
 void
 print_bar(Bar *series, char *chart, int x_offset)
 {
-	int width = WIDTH - 2; //offset things
 	int height = HEIGHT - 1; //offset things
 	int y_offset = 1;
 	int name_len = strlen(get_name(series));
@@ -25,8 +25,13 @@ print_bar(Bar *series, char *chart, int x_offset)
 
 	int i = y_offset;
 	for (; i<height; ++i) {
-		chart[i * WIDTH + x_offset] = (i > height - get_number(series)) ?
-			BARBLOCK : BLANK;
+		if (i == HEIGHT - get_number(series)) {
+			char *str = int2str(get_number(series));
+			strncpy(&chart[i * WIDTH + x_offset], str, strlen(str));
+		} else {
+			chart[i * WIDTH + x_offset] = (i > height - get_number(series)) ?
+				BARBLOCK : BLANK;
+		}
 	}
 
 	strncpy(&chart[i * WIDTH + x_offset - name_len/2], get_name(series), name_len);
