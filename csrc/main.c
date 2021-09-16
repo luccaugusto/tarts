@@ -47,7 +47,7 @@ main()
 {
 	Bar *b1 = new_bar(25, "lucca");
 	build_frame();
-	print_bar(b1, &chart, 0);
+	print_bar(b1, chart, 0);
 	show(get_name(b1));
 	return 0;
 }
