@@ -29,16 +29,17 @@ build_frame() {
 		}
 
 		chart[i * WIDTH] = c1;
-		chart[i * WIDTH + WIDTH - 1] = c1;
-		for (int j=1; j < WIDTH-1; ++j)
+		int j=1;
+		for (; j < WIDTH-1; ++j)
 			chart[i * WIDTH + j] = c2;
+		chart [i * WIDTH + j] = c1;
 	}
 }
 
 void
 show(char *title) {
 	/* print title */
-	printf("%s\n", title);
+	strncpy(&chart[1], title, strlen(title));
 	for (int i=0; i < HEIGHT; ++i)
 		printf("%.*s\n", WIDTH, &chart[i * WIDTH] );
 }

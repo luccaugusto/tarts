@@ -3,6 +3,8 @@
 
 #define MAX_BARS ((WIDTH - MAX_NAME_LENGTH) / 3)
 #define BARBLOCK '#'
+#define BARBLOCK_HALF '='
+#define BARBLOCK_QUARTER '.'
 
 /* TYPES */
 typedef struct BarChart Bar;

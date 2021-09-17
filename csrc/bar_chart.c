@@ -16,23 +16,30 @@ struct BarChart {
 void
 print_bar(Bar *series, char *chart, int x_offset, float scale)
 {
-	int height = HEIGHT - 1; //offset things
+	float diff;
 	int y_offset = 1;
+	int diff_margin = 1.0;
+	int plotted_number = 0;
+	int height = HEIGHT - 1;
+	char barblock = BARBLOCK;
 	int name_len = strlen(get_name(series));
-	float scaled_height = (height - get_number(series)) * scale;
+	float scaled_height = height - (get_number(series) * scale);
 
 	x_offset = (x_offset < 1) ? 1 : x_offset;
 	x_offset += name_len / 2;
 
 	int i = y_offset;
 	for (; i<height; ++i) {
+		diff = (float) i - scaled_height;
+
 		/* print number on top of bar */
-		if (i == scaled_height) {
+		if (-diff_margin <= diff && diff <= diff_margin && !plotted_number) {
 			char *str = int2str(get_number(series));
 			strncpy(&chart[i * WIDTH + x_offset], str, strlen(str));
+			plotted_number = 1;
 		} else {
 			chart[i * WIDTH + x_offset] = (i > scaled_height) ?
-				BARBLOCK : BLANK;
+				barblock : BLANK;
 		}
 	}
 
