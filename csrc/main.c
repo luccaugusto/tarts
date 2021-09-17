@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "constants.h"
+#include "pie_chart.h"
 #include "bar_chart.h"
 
 /* GLOBAL VARIABLES */
@@ -62,11 +63,13 @@ main()
 	Bar *b1 = new_bar(25, "lucca");
 	Bar *b2 = new_bar(5, "luquinha");
 	Bar *b3 = new_bar(50, "luccão");
+	Pie *p = new_pie(WIDTH/2,HEIGHT/2, 10, 50);
 	init_chart();
 
 	do {
 		build_frame();
 
+		/*
 		print_bar(b1, chart, x_offset, scale);
 		x_offset += (strlen(get_name(b1)) + 1);
 
@@ -77,6 +80,9 @@ main()
 
 		if (x_offset >= WIDTH)
 			x_offset = 2;
+		*/
+
+		print_pie(p, chart, 1);
 
 		show("TEST");
 	} while ((c = getchar()) != 'q');
