@@ -7,7 +7,7 @@
 
 /* TYPES */
 struct BarChart {
-	int number;
+	float number;
 	char name[MAX_NAME_LENGTH];
 };
 
@@ -18,7 +18,7 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 {
 	float diff;
 	int y_offset = 1;
-	int diff_margin = 1.0;
+	float diff_margin = 1.0;
 	int plotted_number = 0;
 	int height = HEIGHT - 1;
 	char barblock = BARBLOCK;
@@ -46,7 +46,7 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 	strncpy(&chart[i * WIDTH + x_offset - name_len/2], get_name(series), name_len);
 }
 
-int
+float
 get_number (Bar *series)
 {
 	return series->number;
@@ -59,7 +59,7 @@ get_name (Bar *series)
 }
 
 void
-set_number (Bar *series, int number)
+set_number (Bar *series, float number)
 {
 	series->number = number;
 }
@@ -73,7 +73,7 @@ set_name (Bar *series, char *name)
 }
 
 struct BarChart *
-new_bar (int number, char *name)
+new_bar (float number, char *name)
 {
 	int len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
