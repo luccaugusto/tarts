@@ -56,19 +56,30 @@ init_chart()
 int
 main()
 {
+	int c;
 	int x_offset = 2;
-	float scale = 50 / HEIGHT;
+	float scale = (float)(HEIGHT - 1) / (float)50;
 	Bar *b1 = new_bar(25, "lucca");
 	Bar *b2 = new_bar(5, "luquinha");
 	Bar *b3 = new_bar(50, "luccão");
 	init_chart();
-	build_frame();
-	print_bar(b1, chart, x_offset, scale);
-	x_offset += strlen(get_name(b1)) + 1;
-	print_bar(b2, chart, x_offset, scale);
-	x_offset += strlen(get_name(b2)) + 1;
-	print_bar(b3, chart, x_offset, scale);
 
-	show("TEST");
+	do {
+		build_frame();
+
+		print_bar(b1, chart, x_offset, scale);
+		x_offset += (strlen(get_name(b1)) + 1);
+
+		print_bar(b2, chart, x_offset, scale);
+		x_offset += (strlen(get_name(b2)) + 1);
+
+		print_bar(b3, chart, x_offset, scale);
+
+		if (x_offset >= WIDTH)
+			x_offset = 2;
+
+		show("TEST");
+	} while ((c = getchar()) != 'q');
+
 	return 0;
 }
