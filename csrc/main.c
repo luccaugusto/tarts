@@ -7,6 +7,7 @@
 #include "constants.h"
 #include "pie_chart.h"
 #include "bar_chart.h"
+#include "line_chart.h"
 
 //TODO: Fix static assert
 //static_assert(HEIGHT % 2 == 0, "Display height should be divisible by 2, if not pie chart compression won't work. See 'print_pie()' function");
@@ -60,11 +61,21 @@ main()
 	int c;
 	int x_offset = 2;
 	float scale = (float)(HEIGHT - 1) / (float)50;
+	scale = 1;
 	Bar *b1 = new_bar(25, "lucca");
 	Bar *b2 = new_bar(5, "luquinha");
 	Bar *b3 = new_bar(50, "luccão");
 	Pie *p = new_pie(WIDTH/2,HEIGHT/2, 10, 50);
+	float series[2] = {2.5, 22.0};
+	Line *l = new_line(series, "teste", 2);
 	init_chart();
+
+	(void)b1;
+	(void)b2;
+	(void)b3;
+	(void)p;
+	(void)x_offset;
+	//(void)l;
 
 	do {
 
@@ -79,9 +90,11 @@ main()
 
 		if (x_offset >= WIDTH)
 			x_offset = 2;
+
+		print_pie(p, chart, scale);
 		*/
 
-		print_pie(p, chart, 1);
+		print_line_chart(l, chart, scale);
 
 		build_frame();
 		show("TEST");
