@@ -3,7 +3,7 @@
 
 #define PIEBLOCK_FULL   'O'
 #define PIEBLOCK_TOP    '"'
-#define PIEBLOCK_BOTTOM '~'
+#define PIEBLOCK_BOTTOM '_'
 
 typedef struct PieChart Pie;
 

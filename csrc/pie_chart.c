@@ -54,7 +54,7 @@ print_pie(Pie *pie, char *chart, float scale)
 		dy = (center_y - y > 0) ? center_y - y : y - center_y;
 		for (int x=left_x; x < right_x; ++x) {
 			dx = (center_x - x > 0) ? center_x - x : x - center_x;
-			if (dy*dy + dx*dx <= radius_sqr)
+			if (dy*dy + dx*dx < radius_sqr)
 				c = 1;
 			else
 				c = 0;
