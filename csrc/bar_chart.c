@@ -37,6 +37,7 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 			char *str = float2str(bar_get_number(series));
 			strncpy(&chart[i * WIDTH + x_offset - strlen(str)/2], str, strlen(str));
 			plotted_number = 1;
+			free(str);
 		} else {
 			chart[i * WIDTH + x_offset] = (i > scaled_height) ?
 				barblock : BLANK;
