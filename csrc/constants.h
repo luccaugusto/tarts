@@ -1,11 +1,12 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define FRAMED 0
-#define HEIGHT 30
-#define WIDTH 124
-#define BLANK ' '
-#define MAX_NAME_LENGTH 50
+#define FRAMED           1
+#define HEIGHT           30
+#define WIDTH            124
+#define PADDING          2
+#define BLANK            ' '
+#define MAX_NAME_LENGTH  50
 
 enum Frame {
 	FRAME_CORNER   = '+',
