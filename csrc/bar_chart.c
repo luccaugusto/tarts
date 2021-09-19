@@ -22,8 +22,8 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 	int plotted_number = 0;
 	int height = HEIGHT - 1;
 	char barblock = BARBLOCK;
-	int name_len = strlen(get_name(series));
-	float scaled_height = height - (get_number(series) * scale);
+	int name_len = strlen(bar_get_name(series));
+	float scaled_height = height - (bar_get_number(series) * scale);
 
 	x_offset = (x_offset < 1) ? 1 : x_offset;
 	x_offset += name_len / 2;
@@ -34,7 +34,7 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 
 		/* print number on top of bar */
 		if (-diff_margin <= diff && diff <= diff_margin && !plotted_number) {
-			char *str = float2str(get_number(series));
+			char *str = float2str(bar_get_number(series));
 			strncpy(&chart[i * WIDTH + x_offset - strlen(str)/2], str, strlen(str));
 			plotted_number = 1;
 		} else {
@@ -43,29 +43,29 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 		}
 	}
 
-	strncpy(&chart[i * WIDTH + x_offset - name_len/2], get_name(series), name_len);
+	strncpy(&chart[i * WIDTH + x_offset - name_len/2], bar_get_name(series), name_len);
 }
 
 float
-get_number (Bar *series)
+bar_get_number (Bar *series)
 {
 	return series->number;
 }
 
 char *
-get_name (Bar *series)
+bar_get_name (Bar *series)
 {
 	return series->name;
 }
 
 void
-set_number (Bar *series, float number)
+bar_set_number (Bar *series, float number)
 {
 	series->number = number;
 }
 
 void
-set_name (Bar *series, char *name)
+bar_set_name (Bar *series, char *name)
 {
 	int len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);

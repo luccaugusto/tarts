@@ -70,10 +70,10 @@ main()
 
 		/*
 		print_bar(b1, chart, x_offset, scale);
-		x_offset += (strlen(get_name(b1)) + 1);
+		x_offset += (strlen(bar_get_name(b1)) + 1);
 
 		print_bar(b2, chart, x_offset, scale);
-		x_offset += (strlen(get_name(b2)) + 1);
+		x_offset += (strlen(bar_get_name(b2)) + 1);
 
 		print_bar(b3, chart, x_offset, scale);
 
