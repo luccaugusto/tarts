@@ -18,8 +18,6 @@ void
 build_frame() {
 	if (! FRAMED)
 		return;
-	char c1;
-	char c2;
 
 	for (int i=0; i < HEIGHT; ++i) {
 		/* build border horizontally */
