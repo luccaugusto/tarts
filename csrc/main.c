@@ -1,4 +1,5 @@
 /* INCLUDES */
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,6 +7,9 @@
 #include "constants.h"
 #include "pie_chart.h"
 #include "bar_chart.h"
+
+//TODO: Fix static assert
+//static_assert(HEIGHT % 2 == 0, "Display height should be divisible by 2, if not pie chart compression won't work. See 'print_pie()' function");
 
 /* GLOBAL VARIABLES */
 static char chart[HEIGHT * WIDTH];
@@ -20,20 +24,18 @@ build_frame() {
 	for (int i=0; i < HEIGHT; ++i) {
 		/* build border horizontally */
 		if (i == HEIGHT-1 || i == 0) {
-			c1 = FRAME_CORNER;
-			c2 = FRAME_BORDER_H;
+			chart[i * WIDTH] = FRAME_CORNER;
+			int j=1;
+			for (; j < WIDTH-1; ++j)
+				chart[i * WIDTH + j] = FRAME_BORDER_H;
+			chart [i * WIDTH + j] = FRAME_CORNER;
 		}
 		/* build border vertically */
 		else {
-			c1 = FRAME_BORDER_V;
-			c2 = BLANK;
+			chart [i * WIDTH + 0] = FRAME_BORDER_V;
+			chart [i * WIDTH + WIDTH - 1] = FRAME_BORDER_V;
 		}
 
-		chart[i * WIDTH] = c1;
-		int j=1;
-		for (; j < WIDTH-1; ++j)
-			chart[i * WIDTH + j] = c2;
-		chart [i * WIDTH + j] = c1;
 	}
 }
 
@@ -67,7 +69,6 @@ main()
 	init_chart();
 
 	do {
-		build_frame();
 
 		/*
 		print_bar(b1, chart, x_offset, scale);
@@ -84,6 +85,7 @@ main()
 
 		print_pie(p, chart, 1);
 
+		build_frame();
 		show("TEST");
 	} while ((c = getchar()) != 'q');
 
