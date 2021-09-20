@@ -8,23 +8,23 @@
 struct LineChart {
 	float *points;
 	char name[MAX_NAME_LENGTH];
-	int points_len;
+	int count_points;
 };
 
 struct LineChart *
-new_line(float *points, char *name, int points_len)
+new_line(float *points, char *name, int count_points)
 {
 	int name_len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
 
-	int points_lenght = (points_len > WIDTH - PADDING) ?
-		WIDTH - PADDING : points_len;
+	int count_pointsght = (count_points > WIDTH - PADDING) ?
+		WIDTH - PADDING : count_points;
 
 	Line *l = malloc(sizeof(Line));
-	l->points_len = points_lenght;
+	l->count_points = count_pointsght;
 	strncpy(l->name, name, name_len);
-	l->points = malloc(sizeof(float) * points_lenght);
-	memcpy(l->points, points, points_lenght * sizeof(float));
+	l->points = malloc(sizeof(float) * count_pointsght);
+	memcpy(l->points, points, count_pointsght * sizeof(float));
 
 	return l;
 }
@@ -42,9 +42,9 @@ line_get_name(Line *l)
 }
 
 	int
-line_get_points_len(Line *l)
+line_get_count_points(Line *l)
 {
-	return l->points_len;
+	return l->count_points;
 }
 
 /*
@@ -126,14 +126,15 @@ print_line_chart(Line *l, char *chart, float scale)
 {
 	char *point_str;
 	float *points = line_get_points(l);
-	int points_len = line_get_points_len(l);
-	int spacing = (WIDTH - PADDING*2 -1) / (points_len - 1);
+	int count_points = line_get_count_points(l);
+	int spacing = (WIDTH - PADDING*2) / (count_points - 1);
 	float scaled_point;
 	int prev_x = -1;
 	int prev_y = -1;
 
-	int x = PADDING;
-	for (int i=0; i<points_len; ++i) {
+	/* pad both sides */
+	int x = PADDING/2;
+	for (int i=0; i<count_points; ++i) {
 		scaled_point = HEIGHT - 1 - (points[i] * scale);
 		chart[(int)scaled_point * WIDTH + x] = HORIZONTAL;
 
