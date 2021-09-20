@@ -33,7 +33,7 @@ print_bar(Bar *series, char *chart, int x_offset, float scale)
 		diff = (float) i - scaled_height;
 
 		/* print number on top of bar */
-		if (-diff_margin <= diff && diff <= diff_margin && !plotted_number) {
+		if (-diff_margin < diff && diff < diff_margin && !plotted_number) {
 			char *str = float2str(bar_get_number(series));
 			strncpy(&chart[i * WIDTH + x_offset - strlen(str)/2], str, strlen(str));
 			plotted_number = 1;
