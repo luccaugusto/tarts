@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "constants.h"
+
 char *
 int2str(int n)
 {
@@ -20,4 +22,16 @@ float2str(float n)
 
 	sprintf(str, "%.2f", n);
 	return str;
+}
+
+void
+set_color(ColorConstant c)
+{
+	printf(c);
+}
+
+void
+reset_color()
+{
+	printf(ANSI_COLOR_RESET);
 }

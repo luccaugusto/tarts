@@ -12,6 +12,52 @@ struct PieChart {
 	float total;
 };
 
+int
+circle_fits(Pie *pie, float scale)
+{
+	float center_x = get_center_x(pie);
+	float center_y = get_center_y(pie);
+	float scaled_radius = get_radius(pie) * scale;
+
+	if (center_x + scaled_radius > WIDTH) {
+		center_x = (center_x + scaled_radius - WIDTH);
+
+		if (center_x - scaled_radius < 0)
+			return ERR_CIRCLE_TOO_BIG;
+
+		set_center_x(pie, center_x);
+	}
+
+	if (center_x - scaled_radius < 0) {
+		center_x = center_x + -(center_x - scaled_radius);
+
+		if (center_x + scaled_radius > WIDTH)
+			return ERR_CIRCLE_TOO_BIG;
+
+		set_center_x(pie, center_x);
+	}
+
+	if (center_y + scaled_radius > HEIGHT) {
+		center_y = (center_y + scaled_radius - HEIGHT);
+
+		if (center_y - scaled_radius < 0)
+			return ERR_CIRCLE_TOO_BIG;
+
+		set_center_y(pie, center_y);
+	}
+
+	if (center_y - scaled_radius < 0) {
+		center_y = -(center_y - scaled_radius);
+
+		if (center_y + scaled_radius > HEIGHT)
+			return ERR_CIRCLE_TOO_BIG;
+
+		set_center_y(pie, center_y);
+	}
+
+	return 0;
+}
+
 /**
  * Prints the pie chart preserving circle aspect ratio
  * Compresses 2 rows into one so aspect ratio of circle is not deformed.
@@ -25,10 +71,10 @@ struct PieChart {
  * these characters can be changed by the macros
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
-void
+int
 print_pie(Pie *pie, char *chart, float scale)
 {
-	int c, top, bottom;
+	int c, top, bottom, ret_code;
 	// bottom and top are indices b  t
 	static char compression_table[2][2] = {
 	/*          0                  1     */
@@ -36,7 +82,11 @@ print_pie(Pie *pie, char *chart, float scale)
 	/* 1 */{PIEBLOCK_BOTTOM, PIEBLOCK_FULL},
 	};
 
-	//compute circle limits
+	/* check for screen boundaries */
+	if ((ret_code = circle_fits(pie, scale)))
+		return ret_code;
+
+	/* compute circle limits */
 	float dx;
 	float dy;
 	float center_x = get_center_x(pie);
@@ -78,6 +128,7 @@ print_pie(Pie *pie, char *chart, float scale)
 			chart[(y/2 + (int)(top_y * 1.5))*WIDTH + x] = compressed_pie[(y-(int)top_y)*WIDTH + (x-(int)left_x)];
 		}
 	}
+	return 0;
 }
 
 Pie *
@@ -90,6 +141,18 @@ new_pie (float center_x, float center_y, float radius, float total)
 	p->total = total;
 
 	return p;
+}
+
+void
+set_center_x(Pie *p, float center_x)
+{
+	p->center_x = center_x;
+}
+
+void
+set_center_y(Pie *p, float center_y)
+{
+	p->center_y = center_y;
 }
 
 float
