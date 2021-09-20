@@ -10,7 +10,7 @@ PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 #includes and libs
-LIBS=-lpanel -lncurses -lmenu
+LIBS=
 
 #flags
 #no debug:
