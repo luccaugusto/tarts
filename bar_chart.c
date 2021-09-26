@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "canvas.h"
 #include "bar_chart.h"
 #include "utils.h"
 
@@ -14,13 +15,13 @@ struct BarChart {
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar(Bar *series, char *chart, int x_offset, float scale)
+print_bar(Bar *series, Canvas canvas, int x_offset, float scale)
 {
 	float diff;
 	int y_offset = 1;
 	float diff_margin = 1.0;
 	int plotted_number = 0;
-	int height = HEIGHT - 1;
+	int height = canvas_get_height(canvas) - 1;
 	char barblock = BARBLOCK;
 	int name_len = strlen(bar_get_name(series));
 	float scaled_height = height - (bar_get_number(series) * scale);

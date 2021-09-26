@@ -2,8 +2,6 @@
 #define CONSTANTS_H
 
 #define FRAMED           0
-#define HEIGHT           30
-#define WIDTH            124
 #define PADDING          4
 #define BLANK            ' '
 #define MAX_NAME_LENGTH  50

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "canvas.h"
 #include "line_chart.h"
 #include "utils.h"
 
@@ -51,11 +52,12 @@ line_get_count_points(Line *l)
  * Draws a line using Bresenham's algorithm
  */
 void
-draw_line(char *chart, int prev_x, int prev_y, int cur_x, int cur_y)
+draw_line(Canvas canvas, int prev_x, int prev_y, int cur_x, int cur_y)
 {
 	int x, y, dx, dy, i, incrx, incry, const1, const2, p;
 	int y_offset = 0;
 	char lineblock = HORIZONTAL;
+	char *canvas_screen = canvas_get_canvas(canvas);
 	dx = cur_x - prev_x;
 	dy = cur_y - prev_y;
 
@@ -96,11 +98,11 @@ draw_line(char *chart, int prev_x, int prev_y, int cur_x, int cur_y)
 			x += incrx;
 			if (p < 0) {
 				p += const1;
-				chart[y*WIDTH + x] = HORIZONTAL;
+				canvas_screen[y*WIDTH + x] = HORIZONTAL;
 			} else {
 				y += incry;
 				p += const2;
-				chart[(y + y_offset)*WIDTH + x] = lineblock;
+				canvas_screen[(y + y_offset)*WIDTH + x] = lineblock;
 			}
 		}
 	} else {
@@ -111,20 +113,21 @@ draw_line(char *chart, int prev_x, int prev_y, int cur_x, int cur_y)
 			y += incry;
 			if (p < 0) {
 				p += const1;
-				chart[y*WIDTH + x] = HORIZONTAL;
+				canvas_screen[y*WIDTH + x] = HORIZONTAL;
 			} else {
 				x += incrx;
 				p += const2;
-				chart[(y+1)*WIDTH + x] = LINE_DOWN;
+				canvas_screen[(y+1)*WIDTH + x] = LINE_DOWN;
 			}
 		}
 	}
 }
 
 void
-print_line_chart(Line *l, char *chart, float scale)
+print_line_canvas_screen(Line *l, Canvas canvas, float scale)
 {
 	char *point_str;
+	char *canvas_screen = canvas_get_canvas(canvas);
 	float *points = line_get_points(l);
 	int count_points = line_get_count_points(l);
 	int spacing = (WIDTH - PADDING*2) / (count_points - 1);
@@ -136,18 +139,18 @@ print_line_chart(Line *l, char *chart, float scale)
 	int x = PADDING/2;
 	for (int i=0; i<count_points; ++i) {
 		scaled_point = HEIGHT - 1 - (points[i] * scale);
-		chart[(int)scaled_point * WIDTH + x] = HORIZONTAL;
+		canvas_screen[(int)scaled_point * WIDTH + x] = HORIZONTAL;
 
 		/* draw line from first point */
 		if (prev_x >= 0 && prev_y >= 0)
-			draw_line(chart, prev_x, prev_y, x, scaled_point);
+			draw_line(canvas_screen, prev_x, prev_y, x, scaled_point);
 
 		prev_x = x;
 		prev_y = scaled_point;
 
 		/* put value above point */
 		point_str = float2str(points[i]);
-		strncpy(&chart[((int)scaled_point-1) * WIDTH + x], point_str, strlen(point_str));
+		strncpy(&canvas_screen[((int)scaled_point-1) * WIDTH + x], point_str, strlen(point_str));
 		free(point_str);
 
 		x+=spacing;

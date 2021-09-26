@@ -10,13 +10,13 @@ PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 #includes and libs
-LIBS=
+LIBS=-lncurses
 
 #flags
 #no debug:
-CFLAGS= -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
+#CFLAGS= -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
 #debug:
-#CFLAGS= -g -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
+CFLAGS= -g -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
 
 #compiler and linker
 CC=gcc
@@ -80,4 +80,3 @@ run:
 	./${PROJ_NAME}
 
 .PHONY: clean options all
-
