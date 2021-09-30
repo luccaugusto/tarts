@@ -87,20 +87,19 @@ housekeeping(Canvas *s, WINDOW *w)
 int
 main()
 {
-
 	init_tart();
 
 	int c;
 	PlotStatus status;
 	int x_offset = 2;
-	float scale = (float)(max_height) / (float)max_width;
+	float scale = (float)max_height / (float)max_height;
 	Bar *b1 = new_bar(25, "lucca");
 	Bar *b2 = new_bar(5, "luquinha");
 	Bar *b3 = new_bar(50, "luccão");
 	Pie *p = new_pie(10,max_height/2, 14, 50);
 	float series[2] = {2.5, 22.0};
-	Line *l = new_line(series, "teste", 2);
-	Canvas *canvas = new_canvas(max_height, max_width);
+	Canvas *canvas = new_canvas(max_height-1, max_width-1);
+	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
 	WINDOW *tarts_w = create_new_win(max_height, max_width, 0, 0);
 
 	(void)b1;
@@ -112,24 +111,23 @@ main()
 
 	do {
 		canvas_clear(canvas);
+
 		/*
+		print_bar(b1, canvas, x_offset, scale);
+		x_offset += (strlen(bar_get_name(b1)) + 1);
 
-		   print_bar(b1, canvas, x_offset, scale);
-		   x_offset += (strlen(bar_get_name(b1)) + 1);
+		print_bar(b2, canvas, x_offset, scale);
+		x_offset += (strlen(bar_get_name(b2)) + 1);
 
-		   print_bar(b2, canvas, x_offset, scale);
-		   x_offset += (strlen(bar_get_name(b2)) + 1);
+		print_bar(b3, canvas, x_offset, scale);
 
-		   print_bar(b3, canvas, x_offset, scale);
-
-		   if (x_offset >= max_width)
-		   x_offset = 2;
-
-
-		   if ((status = print_pie(p, canvas, scale)))
-		   rotten_tarts(status);
+		if (x_offset >= max_width)
+			x_offset = 2;
 		   */
+
 		print_line_chart(l, canvas, scale);
+		if ((status = print_pie(p, canvas, scale)))
+			rotten_tarts(status);
 
 		show_canvas(canvas, tarts_w);
 		wrefresh(tarts_w);

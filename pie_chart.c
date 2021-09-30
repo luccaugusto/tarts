@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+#include <ncurses.h>
 
+#include "canvas.h"
 #include "constants.h"
 #include "pie_chart.h"
 #include "utils.h"
@@ -13,14 +15,16 @@ struct PieChart {
 };
 
 int
-circle_fits(Pie *pie, float scale)
+circle_fits(Pie *pie, Canvas *canvas, float scale)
 {
 	float center_x = get_center_x(pie);
 	float center_y = get_center_y(pie);
 	float scaled_radius = get_radius(pie) * scale;
+	int width = canvas_get_width(canvas);
+	int height = canvas_get_height(canvas);
 
-	if (center_x + scaled_radius > WIDTH) {
-		center_x = (center_x + scaled_radius - WIDTH);
+	if (center_x + scaled_radius > width) {
+		center_x = (center_x + scaled_radius - width);
 
 		if (center_x - scaled_radius < 0)
 			return ERR_CIRCLE_TOO_BIG;
@@ -31,14 +35,14 @@ circle_fits(Pie *pie, float scale)
 	if (center_x - scaled_radius < 0) {
 		center_x = center_x + -(center_x - scaled_radius);
 
-		if (center_x + scaled_radius > WIDTH)
+		if (center_x + scaled_radius > width)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_x(pie, center_x);
 	}
 
-	if (center_y + scaled_radius > HEIGHT) {
-		center_y = (center_y + scaled_radius - HEIGHT);
+	if (center_y + scaled_radius > height) {
+		center_y = (center_y + scaled_radius - height);
 
 		if (center_y - scaled_radius < 0)
 			return ERR_CIRCLE_TOO_BIG;
@@ -49,7 +53,7 @@ circle_fits(Pie *pie, float scale)
 	if (center_y - scaled_radius < 0) {
 		center_y = -(center_y - scaled_radius);
 
-		if (center_y + scaled_radius > HEIGHT)
+		if (center_y + scaled_radius > height)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_y(pie, center_y);
@@ -72,18 +76,18 @@ circle_fits(Pie *pie, float scale)
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
 int
-print_pie(Pie *pie, char *chart, float scale)
+print_pie(Pie *pie, Canvas *canvas, float scale)
 {
 	int c, top, bottom, ret_code;
 	// bottom and top are indices b  t
 	static char compression_table[2][2] = {
-	/*          0                  1     */
-	/* 0 */{BLANK,           PIEBLOCK_TOP },
-	/* 1 */{PIEBLOCK_BOTTOM, PIEBLOCK_FULL},
+	/*t         0                  1     */
+	/*b0 */{BLANK,           PIEBLOCK_TOP },
+	/*b1 */{PIEBLOCK_BOTTOM, PIEBLOCK_FULL},
 	};
 
 	/* check for screen boundaries */
-	if ((ret_code = circle_fits(pie, scale)))
+	if ((ret_code = circle_fits(pie, canvas, scale)))
 		return ret_code;
 
 	/* compute circle limits */
@@ -97,37 +101,39 @@ print_pie(Pie *pie, char *chart, float scale)
 	float top_y = center_y - scaled_radius;
 	float bottom_y = center_y + scaled_radius;
 	float radius_sqr = scaled_radius*scaled_radius;
+	int width = canvas_get_width(canvas);
+	int height = canvas_get_height(canvas);
 
-	char *compressed_pie = malloc(sizeof(char) * (bottom_y - top_y) * (right_x - left_x));
+	char *canvas_screen = canvas_get_canvas(canvas);
+	char *aux = malloc(sizeof(char) * width * height);
 
+	memset(aux, 0, width*height);
+
+	/* Mark where the circle is */
 	for (int y=top_y; y < bottom_y; ++y) {
-		dy = (center_y - y > 0) ? center_y - y : y - center_y;
+		dy = center_y - y;
 		for (int x=left_x; x < right_x; ++x) {
-			dx = (center_x - x > 0) ? center_x - x : x - center_x;
+			dx = center_x - x;
 			if (dy*dy + dx*dx < radius_sqr)
 				c = 1;
 			else
 				c = 0;
 
-			chart[y * WIDTH + x] = c;
+			aux[y * width + x] = c;
 		}
 	}
 
-	/* build compressed pie from chart */
+	/* build compressed pie from canvas */
 	for (int y=top_y; y<bottom_y; y+=2) {
 		for (int x=left_x; x<right_x; ++x) {
-			top = chart[y * WIDTH + x];
-			bottom = chart[(y + 1) * WIDTH + x];
-			compressed_pie[(y-(int)top_y)*WIDTH + (x-(int)left_x)] = compression_table[bottom][top];
+			top = aux[y * width + x];
+			bottom = aux[(y + 1) * width + x];
+			canvas_screen[(int)((y+height/2)/2 * width + x + width/4)] = compression_table[bottom][top];
 		}
 	}
 
-	/* write compressed pie to chart */
-	for (int y=top_y; y<bottom_y; ++y) {
-		for (int x=left_x; x<right_x; ++x) {
-			chart[(y/2 + (int)(top_y * 1.5))*WIDTH + x] = compressed_pie[(y-(int)top_y)*WIDTH + (x-(int)left_x)];
-		}
-	}
+	free(aux);
+
 	return 0;
 }
 

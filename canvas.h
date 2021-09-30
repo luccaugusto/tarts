@@ -1,7 +1,9 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-typedef struct Screen Screen;
+#define BLANK ' '
+
+typedef struct Canvas Canvas;
 
 void canvas_set_width(struct Canvas *c, int width);
 void canvas_set_height(struct Canvas *c, int height);

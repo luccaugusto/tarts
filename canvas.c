@@ -61,8 +61,8 @@ show_canvas(struct Canvas *s, WINDOW *w)
 	int width = canvas_get_width(s);
 	char *canvas = canvas_get_canvas(s);
 
-	for (int y=0; y<height; ++y) {
-		for (int x=0; x<width; ++x) {
+	for (int y=1; y<height; ++y) {
+		for (int x=1; x<width; ++x) {
 			mvwprintw(w,y, x, "%c", canvas[y * width + x] );
 		}
 	}
@@ -72,7 +72,7 @@ void
 canvas_clear(struct Canvas *s)
 {
 	char *p = s->canvas;
-	int n=s->height*s->width;
+	int n=s->height * s->width - 1;
 	while (n) p[n--] = BLANK;
 }
 
@@ -82,7 +82,7 @@ new_canvas(int height, int width)
 	struct Canvas *s = malloc(sizeof(struct Canvas));
 	canvas_set_height(s, height);
 	canvas_set_width(s, width);
-	s->canvas = malloc(sizeof(char) * (height-1) * (width-1));
+	s->canvas = malloc(sizeof(char) * (height) * (width));
 
 	// clear canvas
 	canvas_clear(s);
