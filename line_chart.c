@@ -142,7 +142,7 @@ print_line_chart(Line *l, Canvas *canvas, float scale)
 	/* pad both sides */
 	int x = PADDING/2;
 	for (int i=0; i<count_points; ++i) {
-		scaled_point = height - 1 - (points[i] * scale);
+		scaled_point = height - (points[i] * scale);
 		canvas_screen[(int)(scaled_point * width) + x] = HORIZONTAL;
 
 		/* draw line from first point */

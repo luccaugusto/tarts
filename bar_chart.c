@@ -28,8 +28,9 @@ print_bar(Bar *series, Canvas *canvas, int x_offset, float scale)
 	float diff;
 	float diff_margin = 1.0;
 	float scaled_height = height - (bar_get_number(series) * scale);
+	scaled_height = (scaled_height >= height) ? height - 1 : scaled_height;
 
-	x_offset = (x_offset < 1) ? 1 : x_offset;
+	x_offset = (x_offset > width) ? x_offset % width : ((x_offset < 1) ? 1 : x_offset);
 	x_offset += name_len / 2;
 
 	int i = y_offset;
@@ -39,7 +40,7 @@ print_bar(Bar *series, Canvas *canvas, int x_offset, float scale)
 		/* print number on top of bar */
 		if (-diff_margin < diff && diff < diff_margin && !plotted_number) {
 			char *str = float2str(bar_get_number(series));
-			strncpy(&canvas_area[i * width + x_offset - strlen(str)/2], str, strlen(str));
+			strncpy(&canvas_area[i * width + x_offset - 1 - strlen(str)/2], str, strlen(str));
 			plotted_number = 1;
 			free(str);
 		} else {
