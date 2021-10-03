@@ -15,12 +15,12 @@
 
 int max_height;
 int max_width;
+char *err_msg = "\0";
 
 /* exits in case a chart can't be plotted */
 void
 rotten_tarts(PlotStatus status)
 {
-	char *err_msg;
 	switch (status) {
 		case PLOT_OK:
 			//OK status but error caught, something weird happened
@@ -29,10 +29,12 @@ rotten_tarts(PlotStatus status)
 		case ERR_CIRCLE_TOO_BIG:
 			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
 			break;
+		case ERR_LINE_OUT:
+			err_msg = "Line chart doesn't fit on canvas with that scale, consider shrinking it";
+			break;
 		default:
 			err_msg = "Error";
 	}
-	fprintf(stderr, "%s\n", err_msg);
 }
 
 void
@@ -88,10 +90,10 @@ main()
 {
 	init_tart();
 
-	int c;
+	int c = BLANK;
 	PlotStatus status = PLOT_OK;
 	int x_offset = 2;
-	float scale = (float)max_height / (float)100;
+	float scale = (float)max_height / (float)max_height;
 	/*
 	*/
 	Bar *b1 = new_bar(25, "lucca");
@@ -104,6 +106,7 @@ main()
 	float series[2] = {2.5, 22.0};
 	float series2[4] = {3.5, 17.0, 10.0, 8.9};
 	Canvas *canvas = new_canvas(max_height-1, max_width-1);
+	//Plot *plot = new_plot(canvas);
 	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
 	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
 	WINDOW *tarts_w = create_new_win(max_height, max_width, 0, 0);
@@ -113,20 +116,36 @@ main()
 	(void)l;
 
 	do {
+		if (c == 'i')
+			scale += 0.1;
+		else if (c == 'd')
+			scale -= 0.1;
+
 		canvas_clear(canvas);
 
-		print_bar(b1, canvas, x_offset, scale);
-		x_offset += (strlen(bar_get_name(b1)) + 1);
+		/*
+		plot_setup(plot, &print_bar, b1, scale, 1);
+		plot_chart(plot);
 
-		print_bar(b2, canvas, x_offset, scale);
-		x_offset += (strlen(bar_get_name(b2)) + 1);
+		plot_setup(plot, &print_bar, b2, scale, (strlen(bar_get_name(b1)) + 1));
+		plot_chart(plot);
 
-		print_bar(b3, canvas, x_offset, scale);
+		plot_setup(plot, &print_bar, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
+		plot_chart(plot);
 
-		print_line_chart(l, canvas, scale);
-		print_line_chart(l2, canvas, scale);
+		*/
 
-		if ((status = print_pie(p, canvas, scale))) {
+		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
+			rotten_tarts(status);
+			break;
+		}
+
+		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
+			rotten_tarts(status);
+			break;
+		}
+
+		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
 			rotten_tarts(status);
 			break;
 		}
@@ -135,7 +154,11 @@ main()
 		wrefresh(tarts_w);
 		doupdate();
 	} while ((c = getchar()) != 'q');
+
 	housekeeping(canvas, tarts_w);
+
+	if (*err_msg)
+		fprintf(stderr, "%s\n", err_msg);
 
 	return status;
 }

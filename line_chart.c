@@ -1,9 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
-#include <ncurses.h>
 
 #include "constants.h"
-#include "canvas.h"
 #include "line_chart.h"
 #include "utils.h"
 
@@ -53,13 +51,11 @@ line_get_count_points(Line *l)
  * Draws a line using Bresenham's algorithm
  */
 void
-draw_line(Canvas *canvas, int prev_x, int prev_y, int cur_x, int cur_y)
+draw_line(int width, char *canvas_screen, int prev_x, int prev_y, int cur_x, int cur_y)
 {
 	int x, y, dx, dy, i, incrx, incry, const1, const2, p;
 	int y_offset = 0;
-	int width = canvas_get_width(canvas);
 	char lineblock = HORIZONTAL;
-	char *canvas_screen = canvas_get_canvas(canvas);
 	dx = cur_x - prev_x;
 	dy = cur_y - prev_y;
 
@@ -125,14 +121,11 @@ draw_line(Canvas *canvas, int prev_x, int prev_y, int cur_x, int cur_y)
 	}
 }
 
-void
-print_line_chart(Line *l, Canvas *canvas, float scale)
+int
+print_line_chart(Line *l, int width, int height, char *canvas_screen, float scale)
 {
 	char *point_str;
-	char *canvas_screen = canvas_get_canvas(canvas);
 	float *points = line_get_points(l);
-	int width = canvas_get_width(canvas);
-	int height = canvas_get_height(canvas);
 	int count_points = line_get_count_points(l);
 	int spacing = (width - PADDING*2) / (count_points - 1);
 	float scaled_point;
@@ -141,13 +134,18 @@ print_line_chart(Line *l, Canvas *canvas, float scale)
 
 	/* pad both sides */
 	int x = PADDING/2;
+
 	for (int i=0; i<count_points; ++i) {
 		scaled_point = height - (points[i] * scale);
+
+		if (scaled_point > (float)height || scaled_point < 0.0)
+			return ERR_LINE_OUT;
+
 		canvas_screen[(int)(scaled_point * width) + x] = HORIZONTAL;
 
 		/* draw line from first point */
 		if (prev_x >= 0 && prev_y >= 0)
-			draw_line(canvas, prev_x, prev_y, x, scaled_point);
+			draw_line(width, canvas_screen, prev_x, prev_y, x, scaled_point);
 
 		prev_x = x;
 		prev_y = scaled_point;
@@ -159,4 +157,6 @@ print_line_chart(Line *l, Canvas *canvas, float scale)
 
 		x+=spacing;
 	}
+
+	return PLOT_OK;
 }

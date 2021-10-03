@@ -8,7 +8,7 @@
 
 typedef struct PieChart Pie;
 
-int print_pie(Pie *pie, Canvas *canvas, float scale);
+int print_pie(Pie *pie, int width, int height, char *canvas_screen, float scale);
 Pie * new_pie (float center_x, float center_y, float radius, float total);
 float get_center_x(Pie *p);
 float get_center_y(Pie *p);

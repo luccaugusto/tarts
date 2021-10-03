@@ -1,8 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <ncurses.h>
 
-#include "canvas.h"
 #include "constants.h"
 #include "pie_chart.h"
 #include "utils.h"
@@ -15,68 +13,68 @@ struct PieChart {
 };
 
 int
-circle_fits(Pie *pie, Canvas *canvas, float scale)
+circle_fits(Pie *pie, int width, int height, char *canvas_screen, float scale)
 {
 	float center_x = get_center_x(pie);
 	float center_y = get_center_y(pie);
 	float scaled_radius = get_radius(pie) * scale;
-	int width = canvas_get_width(canvas);
-	int height = canvas_get_height(canvas);
+	float scaled_radius_h = scaled_radius/2 + 0.5;
 
-	if (center_x + scaled_radius > width) {
-		center_x = (center_x + scaled_radius - width);
+		if (center_x + scaled_radius > width) {
+			center_x = (center_x + scaled_radius - width);
 
-		if (center_x - scaled_radius < 0)
-			return ERR_CIRCLE_TOO_BIG;
+			if (center_x - scaled_radius < 0)
+				return ERR_CIRCLE_TOO_BIG;
 
-		set_center_x(pie, center_x);
+			set_center_x(pie, center_x);
+		}
+
+		if (center_x - scaled_radius < 0) {
+			center_x = center_x + -(center_x - scaled_radius);
+
+			if (center_x + scaled_radius > width)
+				return ERR_CIRCLE_TOO_BIG;
+
+			set_center_x(pie, center_x);
+		}
+
+		/* y gets compressed so we can test with scaled_radius/2 */
+		if (center_y + scaled_radius_h > height) {
+			center_y = (center_y + scaled_radius - height);
+
+			if (center_y - scaled_radius_h < 0)
+				return ERR_CIRCLE_TOO_BIG;
+
+			set_center_y(pie, center_y);
+		}
+
+		if (center_y - scaled_radius_h < 0) {
+			center_y = -(center_y - scaled_radius);
+
+			if (center_y + scaled_radius_h + 1 > height)
+				return ERR_CIRCLE_TOO_BIG;
+
+			set_center_y(pie, center_y);
+		}
+
+		return PLOT_OK;
 	}
 
-	if (center_x - scaled_radius < 0) {
-		center_x = center_x + -(center_x - scaled_radius);
-
-		if (center_x + scaled_radius > width)
-			return ERR_CIRCLE_TOO_BIG;
-
-		set_center_x(pie, center_x);
-	}
-
-	if (center_y + scaled_radius > height) {
-		center_y = (center_y + scaled_radius - height);
-
-		if (center_y - scaled_radius < 0)
-			return ERR_CIRCLE_TOO_BIG;
-
-		set_center_y(pie, center_y);
-	}
-
-	if (center_y - scaled_radius < 0) {
-		center_y = -(center_y - scaled_radius);
-
-		if (center_y + scaled_radius > height)
-			return ERR_CIRCLE_TOO_BIG;
-
-		set_center_y(pie, center_y);
-	}
-
-	return 0;
-}
-
-/**
- * Prints the pie chart preserving circle aspect ratio
- * Compresses 2 rows into one so aspect ratio of circle is not deformed.
- * this is how it is rendered: (. represent blanks and * represents filled pixels)
- *
- * This pair of rows turn into the single row seen below
- * ROW 1 [.,*,.,*]
- * ROW 2 [.,.,*,*]
- *
- * ROW C [ ,",~,O]
- * these characters can be changed by the macros
- * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
- *  */
-int
-print_pie(Pie *pie, Canvas *canvas, float scale)
+	/**
+	 * Prints the pie chart preserving circle aspect ratio
+	 * Compresses 2 rows into one so aspect ratio of circle is not deformed.
+	 * this is how it is rendered: (. represent blanks and * represents filled pixels)
+	 *
+	 * This pair of rows turn into the single row seen below
+	 * ROW 1 [.,*,.,*]
+	 * ROW 2 [.,.,*,*]
+	 *
+	 * ROW C [ ,",~,O]
+	 * these characters can be changed by the macros
+	 * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
+	 *  */
+	int
+	print_pie(Pie *pie, int width, int height, char *canvas_screen, float scale)
 {
 	int c, top, bottom, ret_code;
 	// bottom and top are indices b  t
@@ -87,7 +85,7 @@ print_pie(Pie *pie, Canvas *canvas, float scale)
 	};
 
 	/* check for screen boundaries */
-	if ((ret_code = circle_fits(pie, canvas, scale)))
+	if ((ret_code = circle_fits(pie, width, height, canvas_screen, scale)) != PLOT_OK)
 		return ret_code;
 
 	/* compute circle limits */
@@ -101,11 +99,8 @@ print_pie(Pie *pie, Canvas *canvas, float scale)
 	float top_y = center_y - scaled_radius;
 	float bottom_y = center_y + scaled_radius;
 	float radius_sqr = scaled_radius*scaled_radius;
-	int width = canvas_get_width(canvas);
-	int height = canvas_get_height(canvas);
 
-	char *canvas_screen = canvas_get_canvas(canvas);
-	char *aux = malloc(sizeof(char) * width * height);
+	char *aux = malloc(sizeof(char) * width * height * 2);
 
 	memset(aux, 0, width*height);
 
