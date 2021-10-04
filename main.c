@@ -6,8 +6,8 @@
 #include <ncurses.h>
 #include <errno.h>
 
-#include "canvas.h"
 #include "constants.h"
+#include "canvas.h"
 #include "pie_chart.h"
 #include "bar_chart.h"
 #include "line_chart.h"
@@ -69,10 +69,21 @@ init_tart(void)
 		exit(errno);
 	}
 
+	 if (has_colors() == FALSE) {
+        endwin();
+        puts("This program requires a terminal with color support");
+        exit(1);
+    }
+
 	raw();
+	keypad(stdscr, TRUE);
 	noecho();
+	cbreak();
 	show_cursor(0);
 	getmaxyx(stdscr,max_height,max_width);
+
+    start_color();
+    init_colorpairs();
 }
 
 void
@@ -105,7 +116,7 @@ main()
 	Pie *p = new_pie(10,max_height/2, 14, 50);
 	float series[2] = {2.5, 22.0};
 	float series2[4] = {3.5, 17.0, 10.0, 8.9};
-	Canvas *canvas = new_canvas(max_height-1, max_width-1);
+	Canvas *canvas = new_canvas(max_height-2, max_width-2);
 	//Plot *plot = new_plot(canvas);
 	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
 	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
@@ -132,7 +143,6 @@ main()
 
 		plot_setup(plot, &print_bar, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
 		plot_chart(plot);
-
 		*/
 
 		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {

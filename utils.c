@@ -23,15 +23,3 @@ float2str(float n)
 	sprintf(str, "%.2f", n);
 	return str;
 }
-
-void
-set_color(ColorConstant c)
-{
-	printf(c);
-}
-
-void
-reset_color()
-{
-	printf(ANSI_COLOR_RESET);
-}

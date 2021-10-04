@@ -9,6 +9,7 @@ struct LineChart {
 	float *points;
 	char name[MAX_NAME_LENGTH];
 	int count_points;
+	CanvasColor fg;
 };
 
 struct LineChart *
