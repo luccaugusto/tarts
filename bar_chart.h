@@ -16,6 +16,6 @@ CanvasColor bar_get_color (Bar *series);
 void bar_set_number (Bar *series, float number);
 void bar_set_name (Bar *series, char *name);
 void bar_set_color (Bar *series, CanvasColor color);
-void print_bar(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale);
+void print_bar_chart(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale);
 Bar *new_bar (float number, char *name);
 #endif

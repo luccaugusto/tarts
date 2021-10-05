@@ -16,7 +16,7 @@ struct BarChart {
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale)
+print_bar_chart(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale)
 {
 	int y_offset = 1;
 	int plotted_number = 0;
