@@ -9,14 +9,14 @@
 struct BarChart {
 	float number;
 	char name[MAX_NAME_LENGTH];
-	CanvasColor color;
+	Color color;
 	int x_offset;
 };
 
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar_chart(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale)
+print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, float scale)
 {
 	int y_offset = 1;
 	int plotted_number = 0;
@@ -92,14 +92,14 @@ bar_set_name (Bar *series, char *name)
 	strncpy(series->name, name, len);
 }
 
-CanvasColor
+Color
 bar_get_color (Bar *series)
 {
 	return series->color;
 }
 
 void
-bar_set_color (Bar *series, CanvasColor color)
+bar_set_color (Bar *series, Color color)
 {
 	series->color = color;
 }

@@ -12,10 +12,10 @@ typedef struct BarChart Bar;
 /* FUNCTION PROTOTYPES */
 float bar_get_number (Bar *series);
 char *bar_get_name (Bar *series);
-CanvasColor bar_get_color (Bar *series);
+Color bar_get_color (Bar *series);
 void bar_set_number (Bar *series, float number);
 void bar_set_name (Bar *series, char *name);
-void bar_set_color (Bar *series, CanvasColor color);
-void print_bar_chart(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale);
+void bar_set_color (Bar *series, Color color);
+void print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, float scale);
 Bar *new_bar (float number, char *name);
 #endif

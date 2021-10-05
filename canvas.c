@@ -10,12 +10,12 @@ struct Canvas{
 	int height;
 	int width;
 	char *canvas;
-	CanvasColor *colors_fg;
-	CanvasColor *colors_bg;
+	Color *colors_fg;
+	Color *colors_bg;
 };
 
 /* FUNCTION PROTOTYPES */
-CanvasColor curs_color(int fg);
+Color curs_color(int fg);
 int is_bold(int fg);
 int colornum(int fg, int bg);
 void unsetcolor(int fg, int bg, WINDOW *w);
@@ -58,13 +58,13 @@ canvas_get_canvas(struct Canvas *s)
 	return s->canvas;
 }
 
-CanvasColor *
+Color *
 canvas_get_colors_bg(struct Canvas *s)
 {
 	return s->colors_bg;
 }
 
-CanvasColor *
+Color *
 canvas_get_colors_fg(struct Canvas *s)
 {
 	return s->colors_fg;
@@ -83,7 +83,7 @@ show_canvas(struct Canvas *c, WINDOW *w)
 	int height = canvas_get_height(c);
 	int width = canvas_get_width(c);
 	char *canvas = canvas_get_canvas(c);
-	CanvasColor *colors_fg = canvas_get_colors_fg(c);
+	Color *colors_fg = canvas_get_colors_fg(c);
 
 	for (int y=0; y<height; ++y) {
 		for (int x=0; x<width; ++x) {
@@ -102,7 +102,7 @@ canvas_clear(struct Canvas *s)
 	int n=s->height * s->width - 1;
 	while (n) c[n--] = BLANK;
 
-	CanvasColor *colors_fg = s->colors_fg;
+	Color *colors_fg = s->colors_fg;
 	n=s->height * s->width - 1;
 	while (n) colors_fg[n--] = COLOR_RED;
 }
@@ -126,10 +126,10 @@ new_canvas(int height, int width)
 /* Color functions taken from
  * https://www.linuxjournal.com/content/about-ncurses-colors-0
  */
-CanvasColor
+Color
 curs_color(int fg)
 {
-	CanvasColor color;
+	Color color;
 
 	switch (7 & fg) {
 		case 0:

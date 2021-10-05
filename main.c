@@ -148,22 +148,24 @@ main()
 		plot_chart(plot);
 		*/
 
-		print_bar_chart(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
-
-		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
-			rotten_tarts(status);
-			break;
-		}
+		//print_bar_chart(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
 
 		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
 			break;
 		}
 
+		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
+			rotten_tarts(status);
+			break;
+		}
+
+		/*
 		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
 			rotten_tarts(status);
 			break;
 		}
+		*/
 
 		show_canvas(canvas, tarts_w);
 		wrefresh(tarts_w);

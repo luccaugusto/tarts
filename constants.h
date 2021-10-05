@@ -6,7 +6,7 @@
 #define BLANK            ' '
 #define MAX_NAME_LENGTH  50
 
-typedef short CanvasColor;
+typedef short Color;
 
 typedef enum {
 	FRAME_CORNER   = '+',

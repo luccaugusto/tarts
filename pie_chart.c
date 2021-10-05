@@ -5,11 +5,19 @@
 #include "pie_chart.h"
 #include "utils.h"
 
+struct Portion {
+	int percentage;
+	char *name;
+	Color color;
+};
+
 struct PieChart {
 	float center_x;
 	float center_y;
 	float radius;
 	float total;
+	struct Portion portion_stack[MAX_PORTIONS];
+	int count_portions;
 };
 
 int
@@ -133,13 +141,14 @@ circle_fits(Pie *pie, int width, int height, char *canvas_screen, float scale)
 }
 
 Pie *
-new_pie (float center_x, float center_y, float radius, float total)
+new_pie(float center_x, float center_y, float radius, float total)
 {
 	Pie *p = malloc(sizeof(Pie));
 	p->center_x = center_x;
 	p->center_y = center_y;
 	p->radius = radius;
 	p->total = total;
+	p->count_portions = 0;
 
 	return p;
 }
@@ -154,6 +163,20 @@ void
 set_center_y(Pie *p, float center_y)
 {
 	p->center_y = center_y;
+}
+
+void
+pie_push_portion(Pie *pie, struct Portion *portion)
+{
+	if (pie->count_portions < MAX_PORTIONS)
+		pie->portion_stack[pie->count_portions++] = *portion;
+}
+
+void
+pie_pop_portion(Pie *pie)
+{
+	if (pie->count_portions > 0)
+		pie->count_portions--;
 }
 
 float
