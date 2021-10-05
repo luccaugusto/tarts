@@ -108,6 +108,7 @@ main()
 	/*
 	*/
 	Bar *b1 = new_bar(25, "lucca");
+	bar_set_color(b1, COLOR_YELLOW);
 	Bar *b2 = new_bar(5, "luquinha");
 	Bar *b3 = new_bar(50, "luccão");
 	(void)b1;
@@ -119,7 +120,9 @@ main()
 	Canvas *canvas = new_canvas(max_height-2, max_width-2);
 	//Plot *plot = new_plot(canvas);
 	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
+	line_set_color(l, COLOR_BLUE);
 	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
+	line_set_color(l2, COLOR_GREEN);
 	WINDOW *tarts_w = create_new_win(max_height, max_width, 0, 0);
 
 	(void)p;
@@ -135,25 +138,24 @@ main()
 		canvas_clear(canvas);
 
 		/*
-		plot_setup(plot, &print_bar, b1, scale, 1);
+		plot_setup(plot, &print_bar_chart, b1, scale, 1);
 		plot_chart(plot);
 
-		plot_setup(plot, &print_bar, b2, scale, (strlen(bar_get_name(b1)) + 1));
+		plot_setup(plot, &print_bar_chart, b2, scale, (strlen(bar_get_name(b1)) + 1));
 		plot_chart(plot);
 
-		plot_setup(plot, &print_bar, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
+		plot_setup(plot, &print_bar_chart, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
 		plot_chart(plot);
 		*/
 
-		bar_set_color(b1, COLOR_YELLOW);
-		print_bar(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
+		print_bar_chart(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
 
-		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
+		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
 			break;
 		}
 
-		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
+		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
 			break;
 		}
