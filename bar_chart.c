@@ -9,24 +9,25 @@
 struct BarChart {
 	float number;
 	char name[MAX_NAME_LENGTH];
+	CanvasColor color;
+	int x_offset;
 };
 
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar(Bar *series, int width, int height, char *canvas_screen, float scale, int x_offset)
+print_bar(Bar *series, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale)
 {
 	int y_offset = 1;
 	int plotted_number = 0;
 	height -= 1;
-	char barblock = BARBLOCK;
 	int name_len = strlen(bar_get_name(series));
 	float diff;
 	float diff_margin = 1.0;
 	float scaled_height = height - (bar_get_number(series) * scale);
 	scaled_height = (scaled_height >= height) ? height - 1 : scaled_height;
 
-	x_offset = (x_offset > width) ? x_offset % width : ((x_offset < 1) ? 1 : x_offset);
+	int x_offset = (series->x_offset > width) ? series->x_offset % width : ((series->x_offset < 1) ? 1 : series->x_offset);
 	x_offset += name_len / 2;
 
 	int i = y_offset;
@@ -36,16 +37,33 @@ print_bar(Bar *series, int width, int height, char *canvas_screen, float scale, 
 		/* print number on top of bar */
 		if (-diff_margin < diff && diff < diff_margin && !plotted_number) {
 			char *str = float2str(bar_get_number(series));
-			strncpy(&canvas_screen[i * width + x_offset - 1 - strlen(str)/2], str, strlen(str));
+			int number_len = strlen(str);
+
+			int j = (i * width + x_offset - 1 - number_len/2);
+			int k = j + number_len;
+
+			strncpy(&canvas_screen[j], str, number_len);
+
+			/* color number */
+			for (; j<k; ++j)
+				canvas_colors[j] = series->color;
+
 			plotted_number = 1;
 			free(str);
+		} else if (i > scaled_height) {
+			canvas_screen[i * width + x_offset] = BARBLOCK;
+			canvas_colors[i * width + x_offset] = series->color;
 		} else {
-			canvas_screen[i * width + x_offset] = (i > scaled_height) ?
-				barblock : BLANK;
+			canvas_screen[i * width + x_offset] = BLANK;
 		}
 	}
 
-	strncpy(&canvas_screen[i * width + x_offset - name_len/2], bar_get_name(series), name_len);
+	/* color name */
+	int j = (i * width + x_offset - name_len/2);
+	int k = j + name_len;
+	strncpy(&canvas_screen[j], bar_get_name(series), name_len);
+	for (; j < k; ++j)
+		canvas_colors[j] = series->color;
 }
 
 float
@@ -72,6 +90,18 @@ bar_set_name (Bar *series, char *name)
 	int len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
 	strncpy(series->name, name, len);
+}
+
+CanvasColor
+bar_get_color (Bar *series)
+{
+	return series->color;
+}
+
+void
+bar_set_color (Bar *series, CanvasColor color)
+{
+	series->color = color;
 }
 
 struct BarChart *

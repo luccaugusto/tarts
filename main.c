@@ -145,6 +145,9 @@ main()
 		plot_chart(plot);
 		*/
 
+		bar_set_color(b1, COLOR_YELLOW);
+		print_bar(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
+
 		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
 			rotten_tarts(status);
 			break;

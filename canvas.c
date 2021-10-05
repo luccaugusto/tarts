@@ -104,7 +104,7 @@ canvas_clear(struct Canvas *s)
 
 	CanvasColor *colors_fg = s->colors_fg;
 	n=s->height * s->width - 1;
-	while (n) colors_fg[n--] = COLOR_BLACK;
+	while (n) colors_fg[n--] = COLOR_RED;
 }
 
 struct Canvas *
