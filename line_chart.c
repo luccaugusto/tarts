@@ -9,7 +9,7 @@ struct LineChart {
 	float *points;
 	char name[MAX_NAME_LENGTH];
 	int count_points;
-	CanvasColor color;
+	Color color;
 };
 
 struct LineChart *
@@ -48,14 +48,14 @@ line_get_count_points(Line *l)
 	return l->count_points;
 }
 
-CanvasColor
+Color
 line_get_color(Line *l)
 {
 	return l->color;
 }
 
 void
-line_set_color(Line *l, CanvasColor c)
+line_set_color(Line *l, Color c)
 {
 	l->color = c;
 }
@@ -64,7 +64,7 @@ line_set_color(Line *l, CanvasColor c)
  * Draws a line using Bresenham's algorithm
  */
 void
-draw_line(int width, char *canvas_screen, CanvasColor *canvas_colors, int prev_x, int prev_y, int cur_x, int cur_y, CanvasColor color)
+draw_line(int width, char *canvas_screen, Color *canvas_colors, int prev_x, int prev_y, int cur_x, int cur_y, Color color)
 {
 	int x, y, dx, dy, i, incrx, incry, const1, const2, p;
 	int y_offset = 0;
@@ -88,6 +88,10 @@ draw_line(int width, char *canvas_screen, CanvasColor *canvas_colors, int prev_x
 
 	x = prev_x;
 	y = prev_y;
+
+	/* mark current and previous points */
+	canvas_screen[cur_y * width + cur_x] = LINE_POINT;
+	canvas_screen[prev_y * width + prev_x] = LINE_POINT;
 
 	/* line going down */
 	if (prev_y < cur_y) {
@@ -139,7 +143,7 @@ draw_line(int width, char *canvas_screen, CanvasColor *canvas_colors, int prev_x
 }
 
 int
-print_line_chart(Line *l, int width, int height, char *canvas_screen, CanvasColor *canvas_colors, float scale)
+print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *canvas_colors, float scale)
 {
 	char *point_str;
 	float *points = line_get_points(l);
@@ -158,8 +162,6 @@ print_line_chart(Line *l, int width, int height, char *canvas_screen, CanvasColo
 		if (scaled_point > (float)height || scaled_point < 0.0)
 			return ERR_LINE_OUT;
 
-		canvas_screen[(int)(scaled_point * width) + x] = HORIZONTAL;
-
 		/* draw line from first point */
 		if (prev_x >= 0 && prev_y >= 0)
 			draw_line(width, canvas_screen, canvas_colors, prev_x, prev_y, x, scaled_point, l->color);
@@ -169,8 +171,25 @@ print_line_chart(Line *l, int width, int height, char *canvas_screen, CanvasColo
 
 		/* put value above point and color it */
 		point_str = float2str(points[i]);
-		strncpy(&canvas_screen[((int)scaled_point-1) * width + x], point_str, strlen(point_str));
-		int j = ((int)scaled_point-1) * width + x;
+		int y = (int)(scaled_point - 1);
+		/* make sure point value is on a blank space,
+		 * if there is no way, just plot it on top of point
+		 * TODO: didn't work for some reason, make it work
+		 */
+		while (canvas_screen[y * width + x] != BLANK) {
+			if (y < height / 2) {
+				if (y - 1 <= 1)
+					break;
+				--y;
+			} else {
+				if (y + 1 >= height)
+					break;
+				++y;
+			}
+		}
+		strncpy(&canvas_screen[y * width + x], point_str, strlen(point_str));
+
+		int j = y * width + x;
 		int k = j + strlen(point_str);
 		for (; j < k; ++j)
 			canvas_colors[j] = l->color;
