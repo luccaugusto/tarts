@@ -1,8 +1,9 @@
 #ifndef PIE_CHART_H
 #define PIE_CHART_H
 
-#define PIE_OFFSET      1.5
-#define MAX_PORTIONS    100
+#define PIE_OFFSET            1.5
+#define MAX_PORTIONS          100
+#define CIRCLE_DEGREE_COUNT   360
 
 typedef enum {
 	PIEBLOCK_FULL   = 'O',
@@ -13,15 +14,17 @@ typedef enum {
 typedef struct PieChart Pie;
 typedef struct Portion Portion;
 
-int print_pie(Pie *pie, int width, int height, char *canvas_screen, float scale);
-Pie * new_pie (float center_x, float center_y, float radius, float total);
-float get_center_x(Pie *p);
-float get_center_y(Pie *p);
-void set_center_x(Pie *p, float center_x);
-void set_center_y(Pie *p, float center_y);
-float get_radius(Pie *p);
-float get_total(Pie *p);
+Pie *new_pie (double center_x, double center_y, double radius, double total);
+Portion *new_portion(int percentage, char *name, Color color);
+int print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_colors, double scale);
+double get_center_x(Pie *p);
+double get_center_y(Pie *p);
+void set_center_x(Pie *p, double center_x);
+void set_center_y(Pie *p, double center_y);
+double get_radius(Pie *p);
+double get_total(Pie *p);
 void pie_push_portion(Pie *pie, Portion *portion);
 void pie_pop_portion(Pie *pie);
+void pie_show_stack(Pie *pie);
 
 #endif
