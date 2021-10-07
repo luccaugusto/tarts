@@ -15,7 +15,9 @@
 
 int max_height;
 int max_width;
+double scale;
 char *err_msg = "\0";
+WINDOW *tarts_w;
 
 /* exits in case a chart can't be plotted */
 void
@@ -28,13 +30,20 @@ rotten_tarts(PlotStatus status)
 			break;
 		case ERR_CIRCLE_TOO_BIG:
 			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
+			scale -= SCALE_INCREMENT;
 			break;
 		case ERR_LINE_OUT:
 			err_msg = "Line chart doesn't fit on canvas with that scale, consider shrinking it";
+			scale -= SCALE_INCREMENT;
 			break;
 		default:
 			err_msg = "Error";
 	}
+
+	mvwprintw(tarts_w, max_height/2 - 1, max_width/4,"-------------------------------------------");
+	mvwprintw(tarts_w, max_height/2, max_width/4,"%s [press any key to continue]", err_msg);
+	mvwprintw(tarts_w, max_height/2 + 1, max_width/4,"-------------------------------------------");
+	getchar();
 }
 
 void
@@ -87,10 +96,10 @@ init_tart(void)
 }
 
 void
-housekeeping(Canvas *s, WINDOW *w)
+housekeeping(Canvas *s)
 {
-	delwin(w);
-	destroy_canvas(s);
+	delwin(tarts_w);
+	//destroy_canvas(s);
 	show_cursor(1);
 	echo();
 	endwin();
@@ -104,9 +113,8 @@ main()
 	int c = BLANK;
 	PlotStatus status = PLOT_OK;
 	int x_offset = 2;
-	float scale = (float)max_height / (float)max_height;
-	/*
-	*/
+	scale = (double)max_height / (double)max_height;
+
 	Bar *b1 = new_bar(25, "lucca");
 	bar_set_color(b1, COLOR_YELLOW);
 	Bar *b2 = new_bar(5, "luquinha");
@@ -115,15 +123,23 @@ main()
 	(void)b2;
 	(void)b3;
 	Pie *p = new_pie(10,max_height/2, 14, 50);
-	float series[2] = {2.5, 22.0};
-	float series2[4] = {3.5, 17.0, 10.0, 8.9};
+	Portion *portion_1 = new_portion(50, "metade 1", COLOR_GREEN);
+	Portion *portion_2 = new_portion(50, "metade 2", COLOR_RED);
+	pie_push_portion(p, portion_1);
+	pie_push_portion(p, portion_2);
+	/*
+	*/
+
+	double series[2] = {2.5, 22.0};
+	double series2[4] = {3.5, 17.0, 10.0, 8.9};
 	Canvas *canvas = new_canvas(max_height-2, max_width-2);
 	//Plot *plot = new_plot(canvas);
 	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
 	line_set_color(l, COLOR_BLUE);
 	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
 	line_set_color(l2, COLOR_GREEN);
-	WINDOW *tarts_w = create_new_win(max_height, max_width, 0, 0);
+
+	tarts_w = create_new_win(max_height, max_width, 0, 0);
 
 	(void)p;
 	(void)x_offset;
@@ -131,9 +147,9 @@ main()
 
 	do {
 		if (c == 'i')
-			scale += 0.1;
+			scale += SCALE_INCREMENT;
 		else if (c == 'd')
-			scale -= 0.1;
+			scale -= SCALE_INCREMENT;
 
 		canvas_clear(canvas);
 
@@ -146,36 +162,33 @@ main()
 
 		plot_setup(plot, &print_bar_chart, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
 		plot_chart(plot);
-		*/
 
 		//print_bar_chart(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
 
 		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
-			break;
 		}
 
 		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
-			break;
-		}
-
-		/*
-		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), scale))) {
-			rotten_tarts(status);
-			break;
 		}
 		*/
+
+		/*
+		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
+			rotten_tarts(status);
+		}
+		*/
+
+		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
+		rotten_tarts(status);
+		}
 
 		show_canvas(canvas, tarts_w);
 		wrefresh(tarts_w);
 		doupdate();
 	} while ((c = getchar()) != 'q');
-
-	housekeeping(canvas, tarts_w);
-
-	if (*err_msg)
-		fprintf(stderr, "%s\n", err_msg);
+	housekeeping(canvas);
 
 	return status;
 }

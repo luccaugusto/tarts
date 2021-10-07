@@ -15,7 +15,7 @@ int2str(int n)
 }
 
 char *
-float2str(float n)
+double2str(double n)
 {
 	int length = snprintf(NULL, 0,"%.2f",n);
 	char *str = malloc(sizeof(char) * (length + 1));

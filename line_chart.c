@@ -6,14 +6,14 @@
 #include "utils.h"
 
 struct LineChart {
-	float *points;
+	double *points;
 	char name[MAX_NAME_LENGTH];
 	int count_points;
 	Color color;
 };
 
 struct LineChart *
-new_line(float *points, char *name, int width, int count_points)
+new_line(double *points, char *name, int width, int count_points)
 {
 	int name_len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
@@ -24,13 +24,13 @@ new_line(float *points, char *name, int width, int count_points)
 	Line *l = malloc(sizeof(Line));
 	l->count_points = count_points;
 	strncpy(l->name, name, name_len);
-	l->points = malloc(sizeof(float) * count_points);
-	memcpy(l->points, points, count_points * sizeof(float));
+	l->points = malloc(sizeof(double) * count_points);
+	memcpy(l->points, points, count_points * sizeof(double));
 
 	return l;
 }
 
-float *
+double *
 line_get_points(Line *l)
 {
 	return l->points;
@@ -143,13 +143,13 @@ draw_line(int width, char *canvas_screen, Color *canvas_colors, int prev_x, int 
 }
 
 int
-print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *canvas_colors, float scale)
+print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
 {
 	char *point_str;
-	float *points = line_get_points(l);
+	double *points = line_get_points(l);
 	int count_points = line_get_count_points(l);
 	int spacing = (width - PADDING*2) / (count_points - 1);
-	float scaled_point;
+	double scaled_point;
 	int prev_x = -1;
 	int prev_y = -1;
 
@@ -159,7 +159,7 @@ print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *can
 	for (int i=0; i<count_points; ++i) {
 		scaled_point = height - (points[i] * scale);
 
-		if (scaled_point > (float)height || scaled_point < 0.0)
+		if (scaled_point > (double)height || scaled_point < 0.0)
 			return ERR_LINE_OUT;
 
 		/* draw line from first point */
@@ -170,7 +170,7 @@ print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *can
 		prev_y = scaled_point;
 
 		/* put value above point and color it */
-		point_str = float2str(points[i]);
+		point_str = double2str(points[i]);
 		int y = (int)(scaled_point - 1);
 		/* make sure point value is on a blank space,
 		 * if there is no way, just plot it on top of point

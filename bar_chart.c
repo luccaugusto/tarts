@@ -7,7 +7,7 @@
 
 /* TYPES */
 struct BarChart {
-	float number;
+	double number;
 	char name[MAX_NAME_LENGTH];
 	Color color;
 	int x_offset;
@@ -16,15 +16,15 @@ struct BarChart {
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, float scale)
+print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
 {
 	int y_offset = 1;
 	int plotted_number = 0;
 	height -= 1;
 	int name_len = strlen(bar_get_name(series));
-	float diff;
-	float diff_margin = 1.0;
-	float scaled_height = height - (bar_get_number(series) * scale);
+	double diff;
+	double diff_margin = 1.0;
+	double scaled_height = height - (bar_get_number(series) * scale);
 	scaled_height = (scaled_height >= height) ? height - 1 : scaled_height;
 
 	int x_offset = (series->x_offset > width) ? series->x_offset % width : ((series->x_offset < 1) ? 1 : series->x_offset);
@@ -32,11 +32,11 @@ print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *
 
 	int i = y_offset;
 	for (; i<height; ++i) {
-		diff = (float) i - scaled_height;
+		diff = (double) i - scaled_height;
 
 		/* print number on top of bar */
 		if (-diff_margin < diff && diff < diff_margin && !plotted_number) {
-			char *str = float2str(bar_get_number(series));
+			char *str = double2str(bar_get_number(series));
 			int number_len = strlen(str);
 
 			int j = (i * width + x_offset - 1 - number_len/2);
@@ -66,7 +66,7 @@ print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *
 		canvas_colors[j] = series->color;
 }
 
-float
+double
 bar_get_number (Bar *series)
 {
 	return series->number;
@@ -79,7 +79,7 @@ bar_get_name (Bar *series)
 }
 
 void
-bar_set_number (Bar *series, float number)
+bar_set_number (Bar *series, double number)
 {
 	series->number = number;
 }
@@ -105,7 +105,7 @@ bar_set_color (Bar *series, Color color)
 }
 
 struct BarChart *
-new_bar (float number, char *name)
+new_bar (double number, char *name)
 {
 	int len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
