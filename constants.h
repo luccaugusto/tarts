@@ -18,14 +18,16 @@ typedef enum {
 } Frame;
 
 typedef enum {
-	BACK = 0,
-	FORE = 1,
-} Pixel;
-
-typedef enum {
 	PLOT_OK = 0,
 	ERR_CIRCLE_TOO_BIG,
 	ERR_LINE_OUT,
 } PlotStatus;
+
+typedef enum {
+	BAR_CHART,
+	PIE_CHART,
+	LINE_CHART,
+	COUNT_CHARTS,
+} ChartType;
 
 #endif

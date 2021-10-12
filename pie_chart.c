@@ -86,9 +86,10 @@ circle_fits(Pie *pie, int width, int height, double scale)
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
 /* TODO: refactor this into a smaller function signature */
-int
-print_pie(Pie *pie, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
+PlotStatus
+print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
+	struct PieChart *pie = (struct PieChart *)p;
 	int c, top, bottom, ret_code, length;
 	int height = dimentions->height;
 	int width = dimentions->width;

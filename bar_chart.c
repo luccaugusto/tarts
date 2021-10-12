@@ -15,9 +15,10 @@ struct BarChart {
 
 /* FUNCTION DEFINITIONS */
 
-void
-print_bar_chart(Bar *series, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
+PlotStatus
+print_bar_chart(void *s, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
+	struct BarChart *series = (struct BarChart *)s;
 	int y_offset = 1;
 	int plotted_number = 0;
 	int height = dimentions->height - 1;
@@ -65,6 +66,8 @@ print_bar_chart(Bar *series, struct Dimentions *dimentions, char *canvas_screen,
 	strncpy(&canvas_screen[j], bar_get_name(series), name_len);
 	for (; j < k; ++j)
 		canvas_colors[j] = series->color;
+
+	return PLOT_OK;
 }
 
 double

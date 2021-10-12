@@ -12,6 +12,7 @@
 #include "bar_chart.h"
 #include "line_chart.h"
 #include "utils.h"
+#include "plot.h"
 
 int max_height;
 int max_width;
@@ -140,7 +141,7 @@ main()
 	double series[2] = {2.5, 22.0};
 	double series2[4] = {3.5, 17.0, 10.0, 8.9};
 	Canvas *canvas = new_canvas(max_height-2, max_width-2);
-	//Plot *plot = new_plot(canvas);
+	Plot *plot = new_plot(canvas);
 	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
 	line_set_color(l, COLOR_BLUE);
 	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
@@ -161,6 +162,10 @@ main()
 
 		canvas_clear(canvas);
 
+		plot_setup(plot, print_bar_chart, b1);
+		execute_plot(plot);
+
+		/*
 		print_line_chart(l, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
 		print_line_chart(l2, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
 
@@ -169,6 +174,7 @@ main()
 		if ((status = print_pie(p, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas)))) {
 			rotten_tarts(status);
 		}
+		*/
 
 		show_canvas(canvas, tarts_w);
 		wrefresh(tarts_w);

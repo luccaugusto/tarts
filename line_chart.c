@@ -142,9 +142,10 @@ draw_line(int width, char *canvas_screen, Color *canvas_colors, int prev_x, int 
 	}
 }
 
-int
-print_line_chart(Line *l, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
+PlotStatus
+print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
+	struct LineChart *l = (Line *)line;
 	char *point_str;
 	double scaled_point;
 	double *points = line_get_points(l);
