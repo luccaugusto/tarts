@@ -16,7 +16,7 @@ typedef struct Portion Portion;
 
 Pie *new_pie (double center_x, double center_y, double radius, double total);
 Portion *new_portion(int percentage, char *name, Color color);
-int print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_colors, double scale);
+int print_pie(Pie *pie, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors);
 double get_center_x(Pie *p);
 double get_center_y(Pie *p);
 void set_center_x(Pie *p, double center_x);

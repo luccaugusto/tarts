@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "constants.h"
-#include "pie_chart.h"
-#include "utils.h"
+#include "./utils.h"
+#include "./constants.h"
+#include "./pie_chart.h"
 
 struct Portion {
 	int percentage;
@@ -87,9 +87,12 @@ circle_fits(Pie *pie, int width, int height, double scale)
  *  */
 /* TODO: refactor this into a smaller function signature */
 int
-print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
+print_pie(Pie *pie, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
 	int c, top, bottom, ret_code, length;
+	int height = dimentions->height;
+	int width = dimentions->width;
+	double scale = dimentions->scale;
 	/* check for screen boundaries */
 	if ((ret_code = circle_fits(pie, width, height, scale)) != PLOT_OK)
 		return ret_code;

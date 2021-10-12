@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "constants.h"
-#include "bar_chart.h"
 #include "utils.h"
+#include "bar_chart.h"
 
 /* TYPES */
 struct BarChart {
@@ -16,15 +16,16 @@ struct BarChart {
 /* FUNCTION DEFINITIONS */
 
 void
-print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
+print_bar_chart(Bar *series, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
 	int y_offset = 1;
 	int plotted_number = 0;
-	height -= 1;
+	int height = dimentions->height - 1;
+	int width = dimentions->width;
 	int name_len = strlen(bar_get_name(series));
 	double diff;
 	double diff_margin = 1.0;
-	double scaled_height = height - (bar_get_number(series) * scale);
+	double scaled_height = height - (bar_get_number(series) * dimentions->scale);
 	scaled_height = (scaled_height >= height) ? height - 1 : scaled_height;
 
 	int x_offset = (series->x_offset > width) ? series->x_offset % width : ((series->x_offset < 1) ? 1 : series->x_offset);

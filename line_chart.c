@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "constants.h"
-#include "line_chart.h"
 #include "utils.h"
+#include "line_chart.h"
 
 struct LineChart {
 	double *points;
@@ -143,13 +143,15 @@ draw_line(int width, char *canvas_screen, Color *canvas_colors, int prev_x, int 
 }
 
 int
-print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
+print_line_chart(Line *l, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
 	char *point_str;
+	double scaled_point;
 	double *points = line_get_points(l);
+	int width = dimentions->width;
+	int height = dimentions->height;
 	int count_points = line_get_count_points(l);
 	int spacing = (width - PADDING*2) / (count_points - 1);
-	double scaled_point;
 	int prev_x = -1;
 	int prev_y = -1;
 
@@ -157,7 +159,7 @@ print_line_chart(Line *l, int width, int height, char *canvas_screen, Color *can
 	int x = PADDING/2;
 
 	for (int i=0; i<count_points; ++i) {
-		scaled_point = height - (points[i] * scale);
+		scaled_point = height - (points[i] * dimentions->scale);
 
 		if (scaled_point > (double)height || scaled_point < 0.0)
 			return ERR_LINE_OUT;

@@ -157,31 +157,16 @@ main()
 			scale += SCALE_INCREMENT;
 		else if (c == 'd')
 			scale -= SCALE_INCREMENT;
+		canvas_set_scale(canvas, scale);
 
 		canvas_clear(canvas);
 
-		/*
-		plot_setup(plot, &print_bar_chart, b1, scale, 1);
-		plot_chart(plot);
+		print_line_chart(l, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
+		print_line_chart(l2, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
 
-		plot_setup(plot, &print_bar_chart, b2, scale, (strlen(bar_get_name(b1)) + 1));
-		plot_chart(plot);
+		print_bar_chart(b1, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
 
-		plot_setup(plot, &print_bar_chart, b3, scale, (strlen(bar_get_name(b1)) + 1) + (strlen(bar_get_name(b2)) + 1));
-		plot_chart(plot);
-
-		//print_bar_chart(b1, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale);
-
-		if ((status = print_line_chart(l2, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
-			rotten_tarts(status);
-		}
-
-		if ((status = print_line_chart(l, canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
-			rotten_tarts(status);
-		}
-		*/
-
-		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
+		if ((status = print_pie(p, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas)))) {
 			rotten_tarts(status);
 		}
 

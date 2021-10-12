@@ -16,6 +16,6 @@ Color bar_get_color (Bar *series);
 void bar_set_number (Bar *series, double number);
 void bar_set_name (Bar *series, char *name);
 void bar_set_color (Bar *series, Color color);
-void print_bar_chart(Bar *series, int width, int height, char *canvas_screen, Color *canvas_colors, double scale);
+void print_bar_chart(Bar *series, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors);
 Bar *new_bar (double number, char *name);
 #endif
