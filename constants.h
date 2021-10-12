@@ -1,13 +1,13 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define FRAMED           0
-#define PADDING          4
-#define BLANK            ' '
-#define MAX_NAME_LENGTH  50
-#define SCALE_INCREMENT  0.1
-#define PI               3.14159265
-#define RADIANS_TO_DEG   180.0/PI
+#define FRAMED              0
+#define PADDING             4
+#define BLANK               ' '
+#define MAX_NAME_LENGTH     50
+#define SCALE_INCREMENT     0.1
+#define PI                  3.14159265
+#define RADIANS_TO_DEG(x)   (x * 180.0/PI)
 
 typedef short Color;
 

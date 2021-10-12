@@ -20,6 +20,7 @@ char *err_msg = "\0";
 WINDOW *tarts_w;
 
 /* exits in case a chart can't be plotted */
+/* TODO: Make error message pop in a nice way, like the prompt_get_note from anote */
 void
 rotten_tarts(PlotStatus status)
 {
@@ -99,7 +100,7 @@ void
 housekeeping(Canvas *s)
 {
 	delwin(tarts_w);
-	//destroy_canvas(s);
+	destroy_canvas(s);
 	show_cursor(1);
 	echo();
 	endwin();
@@ -122,11 +123,17 @@ main()
 	(void)b1;
 	(void)b2;
 	(void)b3;
-	Pie *p = new_pie(10,max_height/2, 14, 50);
-	Portion *portion_1 = new_portion(50, "metade 1", COLOR_GREEN);
-	Portion *portion_2 = new_portion(50, "metade 2", COLOR_RED);
+	Pie *p = new_pie(10,max_height/2, 15, 50);
+	Portion *portion_1 = new_portion(20, "metade 1", COLOR_GREEN);
+	Portion *portion_2 = new_portion(20, "metade 2", COLOR_BLUE);
+	Portion *portion_3 = new_portion(20, "metade 3", COLOR_RED);
+	Portion *portion_4 = new_portion(20, "metade 3", COLOR_WHITE);
+	Portion *portion_5 = new_portion(20, "metade 3", COLOR_YELLOW);
 	pie_push_portion(p, portion_1);
 	pie_push_portion(p, portion_2);
+	pie_push_portion(p, portion_3);
+	pie_push_portion(p, portion_4);
+	pie_push_portion(p, portion_5);
 	/*
 	*/
 
@@ -174,14 +181,8 @@ main()
 		}
 		*/
 
-		/*
 		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
 			rotten_tarts(status);
-		}
-		*/
-
-		if ((status = print_pie(p,  canvas_get_width(canvas), canvas_get_height(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas), scale))) {
-		rotten_tarts(status);
 		}
 
 		show_canvas(canvas, tarts_w);

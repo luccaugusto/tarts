@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "constants.h"
@@ -24,7 +25,7 @@ struct PieChart {
 };
 
 int
-circle_fits(Pie *pie, int width, int height, char *canvas_screen, double scale)
+circle_fits(Pie *pie, int width, int height, double scale)
 {
 	double center_x = get_center_x(pie);
 	double center_y = get_center_y(pie);
@@ -84,12 +85,13 @@ circle_fits(Pie *pie, int width, int height, char *canvas_screen, double scale)
  * these characters can be changed by the macros
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
+/* TODO: refactor this into a smaller function signature */
 int
 print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_colors, double scale)
 {
 	int c, top, bottom, ret_code, length;
 	/* check for screen boundaries */
-	if ((ret_code = circle_fits(pie, width, height, canvas_screen, scale)) != PLOT_OK)
+	if ((ret_code = circle_fits(pie, width, height, scale)) != PLOT_OK)
 		return ret_code;
 
 	// bottom and top are indices b  t
@@ -99,7 +101,7 @@ print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_co
 		/*b1 */{PIEBLOCK_BOTTOM, PIEBLOCK_FULL},
 	};
 	/* compute circle limits */
-	double angle, radians, dx, dy;
+	double angle, radians, dx, dy, divisor;
 	double center_x = get_center_x(pie);
 	double center_y = get_center_y(pie);
 	double scaled_radius = get_radius(pie) * scale;
@@ -110,6 +112,7 @@ print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_co
 	double radius_sqr = scaled_radius*scaled_radius;
 	int labels_x_offset = (center_x < width/2) ? PIE_OFFSET : width - PIE_OFFSET - 10;
 	int circle_x, circle_y, pos;
+	int i=0;
 	struct Portion portion;
 
 	char *aux = malloc(sizeof(char) * width * height * 2);
@@ -142,40 +145,45 @@ print_pie(Pie *pie, int width, int height, char *canvas_screen, Color *canvas_co
 			/* Color portions */
 			circle_x = x - center_x;
 			circle_y = y - center_y;
-			if (circle_x*circle_x + circle_y*circle_y<= pie->radius*pie->radius) {
+			if (circle_x*circle_x + circle_y*circle_y <= scaled_radius*scaled_radius) {
+				/* avoid NaNs */
+				if ((divisor = circle_x + sqrt(circle_x*circle_x + circle_y*circle_y)) != 0) {
+					radians = 2 * atan(circle_y/divisor);
+					angle = RADIANS_TO_DEG(radians);
+					angle = (angle < 0) ? CIRCLE_DEGREE_COUNT + angle : angle;
+				} else {
+					/* on the left side, when y = 0, use color from lines above
+					 * to avoid angle 0 because of divisor being 0 */
+					angle = (circle_x < 0) ? 170 : 0;
+				}
 
-				radians = (circle_x != 0) ? atan(circle_y / circle_x) : 0;
-
-				angle = radians * RADIANS_TO_DEG;
 				canvas_colors[pos] = pie->color_by_angle_map[(int)angle];
-				//printf("x: %d/ y: %d/ angle: %f\n", circle_x, circle_y, angle);
 			}
 		}
-	}
 
-	/* print labels */
-	for (int i=0; i < pie->count_portions; ++i) {
-		portion = pie->portion_stack[i];
-		length = strlen(portion.name);
-		strncpy(&canvas_screen[(i + height/4) * width + labels_x_offset], portion.name, length);
-		/* color it */
-		for (int j=0; j < length; ++j)
-			canvas_colors[(i + height/4) * width + labels_x_offset + j] = portion.color;
-	}
+		/* print labels */
+		if (i < pie->count_portions) {
+			portion = pie->portion_stack[i];
+			length = snprintf(NULL, 0, "%s %d%% ", portion.name, portion.percentage);
+			pos = (i + height/2 - pie->count_portions/2) * width + labels_x_offset;
 
+			snprintf(
+					&canvas_screen[pos],
+					length,
+					"%s %d%% ",
+					portion.name,
+					portion.percentage
+					);
+
+			/* color it */
+			for (int j=0; j < length; ++j)
+				canvas_colors[pos + j] = portion.color;
+			++i;
+		}
+	}
 	free(aux);
 	return 0;
 }
-
-/* DEBUG ONLY
-void
-pie_show_stack(Pie *pie)
-{
-	for (int i=0; i < pie->count_portions; ++i) {
-		printf("%d->%s\n", i, pie->portion_stack[i].name);
-	}
-}
-*/
 
 Pie *
 new_pie(double center_x, double center_y, double radius, double total)
@@ -230,13 +238,13 @@ pie_push_portion(Pie *pie, struct Portion *portion)
 	if (pie->count_portions >= MAX_PORTIONS)
 		return;
 
-	double portion_degree_count = portion->percentage/100.0 * CIRCLE_DEGREE_COUNT;
+	double portion_degree_count = (portion->percentage/100.0 * CIRCLE_DEGREE_COUNT);
 	if (pie->color_map_color_count + portion_degree_count > CIRCLE_DEGREE_COUNT)
 		return;
 
 	/* mark in which angles the portion is */
 	pie->portion_stack[pie->count_portions++] = *portion;
-	for (int i=pie->color_map_color_count; i<pie->color_map_color_count + portion_degree_count && i<CIRCLE_DEGREE_COUNT; ++i)
+	for (int i=pie->color_map_color_count; i < (pie->color_map_color_count + portion_degree_count) && i < CIRCLE_DEGREE_COUNT; ++i)
 		pie->color_by_angle_map[i] = portion->color;
 
 	pie->color_map_color_count += portion_degree_count;
