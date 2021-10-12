@@ -7,9 +7,12 @@ typedef struct Canvas Canvas;
 
 void canvas_set_width(struct Canvas *c, int width);
 void canvas_set_height(struct Canvas *c, int height);
+void canvas_set_scale(struct Canvas *s, double scale);
 int canvas_get_width(struct Canvas *c);
 int canvas_get_height(struct Canvas *c);
 int canvas_get_size(struct Canvas *c);
+struct Dimentions *canvas_get_dimentions(struct Canvas *s);
+int canvas_get_scale(struct Canvas *s);
 char *canvas_get_canvas(struct Canvas *c);
 Color *canvas_get_colors_bg(struct Canvas *s);
 Color *canvas_get_colors_fg(struct Canvas *s);

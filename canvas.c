@@ -4,11 +4,11 @@
 #include <ncurses.h>
 
 #include "./constants.h"
+#include "./utils.h"
 
 /* TYPE DEFINITION */
 struct Canvas{
-	int height;
-	int width;
+	struct Dimentions dimentions;
 	char *canvas;
 	Color *colors_fg;
 	Color *colors_bg;
@@ -23,27 +23,45 @@ void setcolor(int fg, int bg, WINDOW *w);
 
 /* FUNCTION DEFINITION */
 void
+canvas_set_scale(struct Canvas *s, double scale)
+{
+	s->dimentions.scale = scale;
+}
+
+void
 canvas_set_width(struct Canvas *s, int width)
 {
-	s->width = width;
+	s->dimentions.width = width;
 }
 
 void
 canvas_set_height(struct Canvas *s, int height)
 {
-	s->height = height;
+	s->dimentions.height = height;
+}
+
+double
+canvas_get_scale(struct Canvas *s)
+{
+	return s->dimentions.scale;
 }
 
 int
 canvas_get_width(struct Canvas *s)
 {
-	return s->width;
+	return s->dimentions.width;
 }
 
 int
 canvas_get_height(struct Canvas *s)
 {
-	return s->height;
+	return s->dimentions.height;
+}
+
+struct Dimentions *
+canvas_get_dimentions(struct Canvas *s)
+{
+	return &s->dimentions;
 }
 
 int
@@ -99,12 +117,12 @@ void
 canvas_clear(struct Canvas *s)
 {
 	char *c = s->canvas;
-	int n=s->height * s->width - 1;
+	int n = canvas_get_height(s) * canvas_get_width(s) - 1;
+	int n2 = n;
 	while (n) c[n--] = BLANK;
 
 	Color *colors_fg = s->colors_fg;
-	n=s->height * s->width - 1;
-	while (n) colors_fg[n--] = COLOR_RED;
+	while (n2) colors_fg[n2--] = COLOR_RED;
 }
 
 struct Canvas *
