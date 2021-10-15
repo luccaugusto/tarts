@@ -85,7 +85,6 @@ circle_fits(Pie *pie, int width, int height, double scale)
  * these characters can be changed by the macros
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
-/* TODO: refactor this into a smaller function signature */
 PlotStatus
 print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors)
 {
@@ -199,9 +198,8 @@ new_pie(double center_x, double center_y, double radius, double total)
 	p->total = total;
 	p->count_portions = 0;
 	p->color_map_color_count = 0;
- 	/* TODO: use a variable for the blank color */
 	for (int i=0; i<CIRCLE_DEGREE_COUNT; ++i )
-		p->color_by_angle_map[i] = (Color)0;
+		p->color_by_angle_map[i] = COLOR_BLANK;
 
 	return p;
 }

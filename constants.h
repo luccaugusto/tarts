@@ -11,6 +11,8 @@
 
 typedef short Color;
 
+#define COLOR_BLANK (Color)0
+
 typedef enum {
 	FRAME_CORNER   = '+',
 	FRAME_BORDER_H = '-',
