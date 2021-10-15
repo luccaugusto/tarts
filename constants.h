@@ -8,6 +8,7 @@
 #define SCALE_INCREMENT     0.1
 #define PI                  3.14159265
 #define RADIANS_TO_DEG(x)   (x * 180.0/PI)
+#define MAX_CHARTS          10
 
 typedef short Color;
 
@@ -32,5 +33,7 @@ typedef enum {
 	LINE_CHART,
 	COUNT_CHARTS,
 } ChartType;
+
+typedef PlotStatus (*PlotFunction)(void *, struct Dimentions *, char *, Color *);
 
 #endif

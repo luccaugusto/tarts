@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <ncurses.h>
 
-#include "./constants.h"
 #include "./utils.h"
+#include "./constants.h"
 
 /* TYPE DEFINITION */
 struct Canvas{

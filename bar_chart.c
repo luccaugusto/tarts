@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "constants.h"
 #include "utils.h"
+#include "constants.h"
 #include "bar_chart.h"
 
 /* TYPES */
@@ -12,6 +12,9 @@ struct BarChart {
 	Color color;
 	int x_offset;
 };
+
+/* GLOBAL VARIABLES */
+int global_x_offset = 0;
 
 /* FUNCTION DEFINITIONS */
 
@@ -119,5 +122,7 @@ new_bar (double number, char *name)
 	Bar *b = malloc(sizeof(Bar));
 	b->number = number;
 	strncpy(b->name, name, len);
+	b->x_offset = global_x_offset;
+	global_x_offset += len + 2;
 	return b;
 }

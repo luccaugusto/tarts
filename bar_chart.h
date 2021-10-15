@@ -9,6 +9,9 @@
 /* TYPES */
 typedef struct BarChart Bar;
 
+/* GLOBAL VARIABLES */
+extern int global_x_offset;
+
 /* FUNCTION PROTOTYPES */
 double bar_get_number (Bar *series);
 char *bar_get_name (Bar *series);
