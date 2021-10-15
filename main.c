@@ -20,34 +20,6 @@ double scale;
 char *err_msg = "\0";
 WINDOW *tarts_w;
 
-/* exits in case a chart can't be plotted */
-/* TODO: Make error message pop in a nice way, like the prompt_get_note from anote */
-void
-rotten_tarts(PlotStatus status)
-{
-	switch (status) {
-		case PLOT_OK:
-			//OK status but error caught, something weird happened
-			err_msg = "Something weird happened, exiting.";
-			break;
-		case ERR_CIRCLE_TOO_BIG:
-			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
-			scale -= SCALE_INCREMENT;
-			break;
-		case ERR_LINE_OUT:
-			err_msg = "Line chart doesn't fit on canvas with that scale, consider shrinking it";
-			scale -= SCALE_INCREMENT;
-			break;
-		default:
-			err_msg = "Error";
-	}
-
-	mvwprintw(tarts_w, max_height/2 - 1, max_width/4,"-------------------------------------------");
-	mvwprintw(tarts_w, max_height/2, max_width/4,"%s [press any key to continue]", err_msg);
-	mvwprintw(tarts_w, max_height/2 + 1, max_width/4,"-------------------------------------------");
-	getchar();
-}
-
 void
 show_cursor(int show)
 {
@@ -164,16 +136,9 @@ main()
 
 		plot_setup(plot, print_bar_chart, b1);
 		execute_plot(plot);
-
 		/*
-		print_line_chart(l, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
-		print_line_chart(l2, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
-
-		print_bar_chart(b1, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas));
-
-		if ((status = print_pie(p, canvas_get_dimentions(canvas), canvas_get_canvas(canvas), canvas_get_colors_fg(canvas)))) {
-			rotten_tarts(status);
-		}
+		plot_setup(plot, print_line_chart, l2);
+		execute_plot(plot);
 		*/
 
 		show_canvas(canvas, tarts_w);

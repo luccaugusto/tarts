@@ -3,7 +3,7 @@
 
 typedef struct Plot Plot;
 
-PlotStatus execute_plot(Plot *plot);
+void execute_plot(Plot *plot);
 Plot *new_plot(Canvas *canvas);
 void plot_setup(struct Plot *p, PlotStatus (*function)(void *, struct Dimentions *, char *, Color *), void *chart);
 void plot_set_function(struct Plot *p, PlotStatus (*function)(void *, struct Dimentions *, char *, Color *));
