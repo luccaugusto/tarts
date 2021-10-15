@@ -1,6 +1,6 @@
 # T(ch)Arts
 
-![tarts logo]("/tarts_logo.png")
+![tarts logo](tarts_logo.png)
 
 Plot charts on the terminal with ascii text
 
