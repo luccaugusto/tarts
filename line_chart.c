@@ -12,24 +12,6 @@ struct LineChart {
 	Color color;
 };
 
-struct LineChart *
-new_line(double *points, char *name, int width, int count_points)
-{
-	int name_len = (strlen(name) > MAX_NAME_LENGTH) ?
-		MAX_NAME_LENGTH : strlen(name);
-
-	count_points = (count_points > width - PADDING) ?
-		width - PADDING : count_points;
-
-	Line *l = malloc(sizeof(Line));
-	l->count_points = count_points;
-	strncpy(l->name, name, name_len);
-	l->points = malloc(sizeof(double) * count_points);
-	memcpy(l->points, points, count_points * sizeof(double));
-
-	return l;
-}
-
 double *
 line_get_points(Line *l)
 {
@@ -147,6 +129,7 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 {
 	struct LineChart *l = (Line *)line;
 	char *point_str;
+	char *line_name = line_get_name(l);
 	double scaled_point;
 	double *points = line_get_points(l);
 	int width = dimentions->width;
@@ -158,11 +141,29 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 
 	/* pad both sides */
 	int x = PADDING/2;
+	int y, j, k, label_offset;
 
+	/* TODO: make a ncurses window to show/hide names */
+	/* Plot line names */
+	x = PADDING/2;
+	y = PADDING/4;
+	while (canvas_screen[y * width + x] != BLANK && x < width - PADDING/2)
+		++x;
+
+	strncpy(&canvas_screen[y * width + x], line_name, strlen(line_name));
+	/* separate names with a | */
+	canvas_screen[y * width + x + strlen(line_name)] = '|';
+
+	j = y * width + x;
+	k = j + strlen(line_name);
+	for (; j < k; ++j)
+		canvas_colors[j] = l->color;
+
+	x = PADDING/2;
 	for (int i=0; i<count_points; ++i) {
 		scaled_point = height - (points[i] * dimentions->scale);
 
-		if (scaled_point > (double)height || scaled_point < 0.0)
+		if (scaled_point > (double)height - PADDING/2 || scaled_point < PADDING/2)
 			return ERR_LINE_OUT;
 
 		/* draw line from first point */
@@ -174,26 +175,27 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 
 		/* put value above point and color it */
 		point_str = double2str(points[i]);
-		int y = (int)(scaled_point - 1);
+		y = (int)(scaled_point - 1);
 		/* make sure point value is on a blank space,
 		 * if there is no way, just plot it on top of point
-		 * TODO: didn't work for some reason, make it work
 		 */
-		while (canvas_screen[y * width + x] != BLANK) {
-			if (y < height / 2) {
-				if (y - 1 <= 1)
-					break;
+		if (y < height / 2) {
+			while (y > 0 && canvas_screen[y * width + x] != BLANK)
 				--y;
-			} else {
-				if (y + 1 >= height)
-					break;
+		} else {
+			while (y+1 < height && canvas_screen[y * width + x] != BLANK)
 				++y;
-			}
 		}
-		strncpy(&canvas_screen[y * width + x], point_str, strlen(point_str));
 
-		int j = y * width + x;
-		int k = j + strlen(point_str);
+		if (x < width / 2)
+			label_offset = 0;
+		else
+			label_offset = strlen(point_str) / 2;
+
+		strncpy(&canvas_screen[y * width + x - label_offset], point_str, strlen(point_str));
+
+		j = y * width + x - label_offset;
+		k = j + strlen(point_str);
 		for (; j < k; ++j)
 			canvas_colors[j] = l->color;
 
@@ -203,4 +205,23 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 	}
 
 	return PLOT_OK;
+}
+
+struct LineChart *
+new_line(double *points, char *name, int width, int count_points)
+{
+	int name_len = (strlen(name) > MAX_NAME_LENGTH) ?
+		MAX_NAME_LENGTH : strlen(name);
+
+	count_points = (count_points > width - PADDING) ?
+		width - PADDING : count_points;
+
+	Line *l = malloc(sizeof(Line));
+
+	l->count_points = count_points;
+	l->points = malloc(sizeof(double) * count_points);
+	strncpy(l->name, name, name_len);
+	memcpy(l->points, points, count_points * sizeof(double));
+
+	return l;
 }
