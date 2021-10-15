@@ -22,6 +22,7 @@ typedef enum {
 typedef enum {
 	PLOT_OK = 0,
 	ERR_CIRCLE_TOO_BIG,
+	ERR_BAR_TOO_BIG,
 	ERR_LINE_OUT,
 } PlotStatus;
 

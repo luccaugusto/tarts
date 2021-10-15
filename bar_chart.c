@@ -27,7 +27,9 @@ print_bar_chart(void *s, struct Dimentions *dimentions, char *canvas_screen, Col
 	double diff;
 	double diff_margin = 1.0;
 	double scaled_height = height - (bar_get_number(series) * dimentions->scale);
-	scaled_height = (scaled_height >= height) ? height - 1 : scaled_height;
+
+	if (scaled_height <= 0)
+		return ERR_BAR_TOO_BIG;
 
 	int x_offset = (series->x_offset > width) ? series->x_offset % width : ((series->x_offset < 1) ? 1 : series->x_offset);
 	x_offset += name_len / 2;
