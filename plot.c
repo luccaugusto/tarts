@@ -38,6 +38,7 @@ void
 execute_plot(struct Plot *plot, WINDOW *w)
 {
 	char *err_msg;
+	(void)err_msg;
 	canvas_clear(plot->canvas);
 	for (int i=0; i<plot->chart_count; ++i) {
 		PlotStatus status = plot->chart_list[i].plot_function(
@@ -51,10 +52,10 @@ execute_plot(struct Plot *plot, WINDOW *w)
 		if (status != PLOT_OK) {
 			err_msg = rotten_tarts(status);
 			canvas_set_scale(plot->canvas, canvas_get_scale(plot->canvas) - SCALE_INCREMENT);
+			break;
 		}
 	}
 	show_canvas(plot->canvas, w);
-	(void)err_msg;
 }
 
 struct Plot *
