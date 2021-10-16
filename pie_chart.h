@@ -14,7 +14,7 @@ typedef enum {
 typedef struct PieChart Pie;
 typedef struct Portion Portion;
 
-Pie *new_pie (double center_x, double center_y, double radius, double total);
+Pie *new_pie (double center_y, double center_x, double radius);
 Portion *new_portion(int percentage, char *name, Color color);
 PlotStatus print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors);
 double get_center_x(Pie *p);
@@ -22,7 +22,6 @@ double get_center_y(Pie *p);
 void set_center_x(Pie *p, double center_x);
 void set_center_y(Pie *p, double center_y);
 double get_radius(Pie *p);
-double get_total(Pie *p);
 void pie_push_portion(Pie *pie, Portion *portion);
 void pie_pop_portion(Pie *pie);
 void pie_show_stack(Pie *pie);

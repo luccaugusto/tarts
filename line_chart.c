@@ -1,9 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "utils.h"
-#include "constants.h"
-#include "line_chart.h"
+#include "./utils.h"
+#include "./constants.h"
+#include "./line_chart.h"
 
 struct LineChart {
 	double *points;

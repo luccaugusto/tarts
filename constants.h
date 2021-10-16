@@ -9,6 +9,7 @@
 #define PI                  3.14159265
 #define RADIANS_TO_DEG(x)   (x * 180.0/PI)
 #define MAX_CHARTS          10
+#define FOOTER_HEIGHT       3
 
 typedef short Color;
 

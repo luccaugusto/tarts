@@ -17,7 +17,6 @@ struct PieChart {
 	double center_x;
 	double center_y;
 	double radius;
-	double total;
 	struct Portion portion_stack[MAX_PORTIONS];
 	int count_portions;
 	Color color_by_angle_map[CIRCLE_DEGREE_COUNT];
@@ -189,13 +188,12 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 }
 
 Pie *
-new_pie(double center_x, double center_y, double radius, double total)
+new_pie(double center_y, double center_x, double radius)
 {
 	Pie *p = malloc(sizeof(Pie));
 	p->center_x = center_x;
 	p->center_y = center_y;
 	p->radius = radius;
-	p->total = total;
 	p->count_portions = 0;
 	p->color_map_color_count = 0;
 	for (int i=0; i<CIRCLE_DEGREE_COUNT; ++i )
@@ -240,13 +238,14 @@ pie_push_portion(Pie *pie, struct Portion *portion)
 	if (pie->count_portions >= MAX_PORTIONS)
 		return;
 
-	double portion_degree_count = (portion->percentage/100.0 * CIRCLE_DEGREE_COUNT);
+	double portion_degree_count = (portion->percentage/100.0 * (double)CIRCLE_DEGREE_COUNT);
 	if (pie->color_map_color_count + portion_degree_count > CIRCLE_DEGREE_COUNT)
 		return;
 
 	/* mark in which angles the portion is */
 	pie->portion_stack[pie->count_portions++] = *portion;
-	for (int i=pie->color_map_color_count; i < (pie->color_map_color_count + portion_degree_count) && i < CIRCLE_DEGREE_COUNT; ++i)
+	int end_angle = pie->color_map_color_count + portion_degree_count;
+	for (int i=pie->color_map_color_count; i < end_angle; ++i)
 		pie->color_by_angle_map[i] = portion->color;
 
 	pie->color_map_color_count += portion_degree_count;
@@ -282,10 +281,4 @@ double
 get_radius(Pie *p)
 {
 	return p->radius;
-}
-
-double
-get_total(Pie *p)
-{
-	return p->total;
 }

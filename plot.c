@@ -5,8 +5,6 @@
 #include "./constants.h"
 #include "./canvas.h"
 
-/* TODO: put a list of charts and plot functions to be able to plot multiple charts on a single plot */
-
 struct ChartFunctionTuple {
 	void *chart;
 	PlotFunction plot_function;
@@ -23,10 +21,6 @@ rotten_tarts(PlotStatus status)
 {
 	char *err_msg;
 	switch (status) {
-		case PLOT_OK:
-			//OK status but error caught, something weird happened
-			err_msg = "Something weird happened, exiting.";
-			break;
 		case ERR_CIRCLE_TOO_BIG:
 			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
 			break;
@@ -41,9 +35,10 @@ rotten_tarts(PlotStatus status)
 }
 
 void
-execute_plot(struct Plot *plot)
+execute_plot(struct Plot *plot, WINDOW *w)
 {
 	char *err_msg;
+	canvas_clear(plot->canvas);
 	for (int i=0; i<plot->chart_count; ++i) {
 		PlotStatus status = plot->chart_list[i].plot_function(
 				plot->chart_list[i].chart,
@@ -58,6 +53,7 @@ execute_plot(struct Plot *plot)
 			canvas_set_scale(plot->canvas, canvas_get_scale(plot->canvas) - SCALE_INCREMENT);
 		}
 	}
+	show_canvas(plot->canvas, w);
 	(void)err_msg;
 }
 
@@ -86,4 +82,12 @@ plot_add_chart(struct Plot *p, void *chart, PlotFunction plot_function)
 	cft.plot_function = plot_function;
 
 	p->chart_list[p->chart_count++] = cft;
+}
+
+void
+destroy_plot(struct Plot *p)
+{
+	for (int i=0; i<p->chart_count; ++i) {
+	}
+	free(p);
 }

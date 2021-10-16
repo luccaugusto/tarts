@@ -6,19 +6,24 @@
 #include <ncurses.h>
 #include <errno.h>
 
+#include "utils.h"
 #include "constants.h"
 #include "canvas.h"
 #include "pie_chart.h"
 #include "bar_chart.h"
 #include "line_chart.h"
-#include "utils.h"
 #include "plot.h"
 
 int max_height;
 int max_width;
-double scale;
+double scale = 1;
 char *err_msg = "\0";
 WINDOW *tarts_w;
+WINDOW *footer_w;
+
+void delete_chart(){return;}
+void add_new_chart(){return;}
+void show_commands_panel(){return;}
 
 void
 show_cursor(int show)
@@ -70,82 +75,77 @@ init_tart(void)
 }
 
 void
-housekeeping(Canvas *s)
+housekeeping(Canvas *s, Plot *p)
 {
 	delwin(tarts_w);
+	delwin(footer_w);
 	destroy_canvas(s);
+	destroy_plot(p);
 	show_cursor(1);
 	echo();
 	endwin();
 }
 
+void
+show_footer_info(void)
+{
+	mvwprintw(footer_w, 1, 1, "? to show help");
+}
+
 int
-main()
+main(void)
 {
 	init_tart();
 
 	int c = BLANK;
+	int tarts_width = max_width;
+	int tarts_height = max_height - FOOTER_HEIGHT;
 	PlotStatus status = PLOT_OK;
-	int x_offset = 2;
-	scale = (double)max_height / (double)max_height;
-
-	Bar *b1 = new_bar(25, "lucca");
-	bar_set_color(b1, COLOR_YELLOW);
-	Bar *b2 = new_bar(5, "luquinha");
-	Bar *b3 = new_bar(50, "luccão");
-	(void)b1;
-	(void)b2;
-	(void)b3;
-	Pie *p = new_pie(10,max_height/2, 15, 50);
-	Portion *portion_1 = new_portion(20, "metade 1", COLOR_GREEN);
-	Portion *portion_2 = new_portion(20, "metade 2", COLOR_BLUE);
-	Portion *portion_3 = new_portion(20, "metade 3", COLOR_RED);
-	Portion *portion_4 = new_portion(20, "metade 3", COLOR_WHITE);
-	Portion *portion_5 = new_portion(20, "metade 3", COLOR_YELLOW);
-	pie_push_portion(p, portion_1);
-	pie_push_portion(p, portion_2);
-	pie_push_portion(p, portion_3);
-	pie_push_portion(p, portion_4);
-	pie_push_portion(p, portion_5);
-	/*
-	*/
-
-	double series[2] = {2.5, 22.0};
-	double series2[4] = {3.5, 17.0, 10.0, 8.9};
-	Canvas *canvas = new_canvas(max_height-2, max_width-2);
+	/* Borders ocupy one char on left, right, top and bottom */
+	Canvas *canvas = new_canvas(tarts_height-2, tarts_width-2);
+	canvas_set_scale(canvas, scale);
 	Plot *plot = new_plot(canvas);
-	Line *l = new_line(series, "teste", canvas_get_width(canvas), 2);
-	line_set_color(l, COLOR_BLUE);
-	Line *l2 = new_line(series2, "teste", canvas_get_width(canvas), 4);
-	line_set_color(l2, COLOR_GREEN);
 
-	tarts_w = create_new_win(max_height, max_width, 0, 0);
+	Pie *p = new_pie(tarts_height/2, tarts_width/4, 15);
+	pie_push_portion(p, new_portion(33, "p1", COLOR_RED));
+	pie_push_portion(p, new_portion(33, "p2", COLOR_BLUE));
+	pie_push_portion(p, new_portion(34, "p3", COLOR_GREEN));
+	plot_add_chart(plot, p, print_pie);
 
-	(void)p;
-	(void)x_offset;
-	(void)l;
+	tarts_w = create_new_win(tarts_height, tarts_width, 0, 0);
+	footer_w = create_new_win(FOOTER_HEIGHT, max_width, tarts_height, 0);
+
+	show_footer_info();
 
 	do {
-		if (c == 'i')
-			scale += SCALE_INCREMENT;
-		else if (c == 'd')
-			scale -= SCALE_INCREMENT;
-		canvas_set_scale(canvas, scale);
-
-		canvas_clear(canvas);
-
-		plot_setup(plot, print_bar_chart, b1);
-		execute_plot(plot);
-		/*
-		plot_setup(plot, print_line_chart, l2);
-		execute_plot(plot);
-		*/
-
-		show_canvas(canvas, tarts_w);
+		switch (c) {
+			case '?':
+				show_commands_panel();
+				break;
+			case 'i':
+				scale += SCALE_INCREMENT;
+				canvas_set_scale(canvas, scale);
+				break;
+			case 'd':
+				scale -= SCALE_INCREMENT;
+				canvas_set_scale(canvas, scale);
+				break;
+			case 'n':
+				add_new_chart();
+				break;
+			case 'D':
+				delete_chart();
+				break;
+			default:
+				//NOP
+				break;
+		};
+		execute_plot(plot, tarts_w);
 		wrefresh(tarts_w);
+		wrefresh(footer_w);
 		doupdate();
-	} while ((c = getchar()) != 'q');
-	housekeeping(canvas);
+	} while ((c = wgetch(tarts_w)) != 'q');
 
+	housekeeping(canvas, plot);
 	return status;
 }
