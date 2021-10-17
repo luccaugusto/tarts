@@ -39,11 +39,12 @@ static char doc[] = "Plot delicious Charts on the Terminal with T(CH)ARTS";
 static char args_doc[] = "[tarts]...";
 static struct argp_option options[] = {
 	/* arg name, flag,   arg value   ,is optional,       description         */
-    { "type"   , 't' ,  "chart type" ,     0     , "[bar/pie/line]"           },
-    { "file"   , 'f' ,  "filename"   ,     0     , "Read charts from file"    },
-    { "label"  , 'l' , "chart label" ,     0     , "Give chart a label"       },
-	{ "values" , 'v' , "value list"  ,     0     , "List of values for chart" },
-    { 0 }
+	{ "type"        , 't' ,  "chart type" ,     0     , "[bar/pie/line]"           },
+	{ "file"        , 'f' ,  "filename"   ,     0     , "Read charts from file"    },
+	{ "label"       , 'l' , "chart label" ,     0     , "Give chart a label"       },
+	{ "values"      , 'v' , "value list"  ,     0     , "List of values for chart" },
+	{ "interactive" , 'i' ,       0       ,     0     , "Disable interactive mode" },
+	{ 0 }
 };
 
 /* TYPES */
@@ -51,6 +52,7 @@ struct arguments {
     enum { NONE, PIECHART, LINECHART, BARCHART } chart;
 	char *label;
 	double val;
+	int interactive;
 };
 
 /* TODO */
@@ -113,7 +115,8 @@ housekeeping(Canvas *s, Plot *p)
 {
 	delwin(tarts_w);
 	delwin(footer_w);
-	destroy_canvas(s);
+	if (s != NULL)
+		destroy_canvas(s);
 	destroy_plot(p);
 	show_cursor(1);
 	echo();
@@ -143,6 +146,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 				  break;
 		case 'v': arguments->val = str2double(arg);
 				  break;
+		case 'i': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
 			return 0;
 		default:
@@ -160,6 +164,7 @@ main(int argc, char *argv[])
 	arguments.chart = NONE;
 	arguments.label = "";
 	arguments.val = 0;
+	arguments.interactive = 1;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -196,6 +201,19 @@ main(int argc, char *argv[])
 		default:
 		case NONE:
 			   break;
+	}
+
+	if (! arguments.interactive) {
+		if (plot_get_chart_count(plot) > 0) {
+			execute_plot(plot, tarts_w);
+			housekeeping(NULL, plot);
+			print_canvas(canvas);
+			destroy_canvas(canvas);
+		} else {
+			housekeeping(canvas,plot);
+			printf("No charts to plot.\n");
+		}
+		return 0;
 	}
 
 	/* TODO: move execution loop to a separate function */

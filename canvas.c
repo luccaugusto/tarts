@@ -96,6 +96,52 @@ destroy_canvas(struct Canvas *s)
 }
 
 void
+print_color(Color color)
+{
+	switch (color) {
+		case COLOR_BLUE:
+			printf("%s",CODE_BLUE);
+			break;
+		case COLOR_GREEN:
+			printf("%s",CODE_GREEN);
+			break;
+		case COLOR_CYAN:
+			printf("%s",CODE_CYAN);
+			break;
+		case COLOR_RED:
+			printf("%s",CODE_RED);
+			break;
+		case COLOR_MAGENTA:
+			printf("%s",CODE_MAGENTA);
+			break;
+		case COLOR_YELLOW:
+			printf("%s",CODE_YELLOW);
+			break;
+		default:
+		case COLOR_WHITE:
+			printf("%s",CODE_WHITE);
+			break;
+	}
+}
+
+void
+print_canvas(struct Canvas *c)
+{
+	int height = canvas_get_height(c);
+	int width = canvas_get_width(c);
+	char *canvas = canvas_get_canvas(c);
+	Color *colors_fg = canvas_get_colors_fg(c);
+
+	for (int y=0; y<height; ++y) {
+		for (int x=0; x<width; ++x) {
+			print_color(colors_fg[y * width + x]);
+			printf("%c%s", canvas[y * width + x],CODE_COLOR_RESET);
+		}
+		printf("\n");
+	}
+}
+
+void
 show_canvas(struct Canvas *c, WINDOW *w)
 {
 	int height = canvas_get_height(c);
@@ -119,10 +165,10 @@ canvas_clear(struct Canvas *s)
 	char *c = s->canvas;
 	int n = canvas_get_height(s) * canvas_get_width(s) - 1;
 	int n2 = n;
-	while (n) c[n--] = BLANK;
+	while (n >= 0) c[n--] = BLANK;
 
 	Color *colors_fg = s->colors_fg;
-	while (n2) colors_fg[n2--] = COLOR_BLANK;
+	while (n2 >= 0) colors_fg[n2--] = COLOR_BLANK;
 }
 
 struct Canvas *
@@ -135,7 +181,6 @@ new_canvas(int height, int width)
 	s->colors_fg = malloc(sizeof(int) * (height) * (width));
 	s->colors_bg = malloc(sizeof(int) * (height) * (width));
 
-	// clear canvas
 	canvas_clear(s);
 
 	return s;

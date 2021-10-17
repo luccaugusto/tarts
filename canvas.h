@@ -17,6 +17,7 @@ char *canvas_get_canvas(struct Canvas *c);
 Color *canvas_get_colors_bg(struct Canvas *s);
 Color *canvas_get_colors_fg(struct Canvas *s);
 void destroy_canvas(struct Canvas *c);
+void print_canvas(struct Canvas *c);
 void show_canvas(struct Canvas *c, WINDOW *w);
 void canvas_clear(struct Canvas *c);
 struct Canvas *new_canvas(int height, int width);

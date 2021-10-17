@@ -104,3 +104,9 @@ destroy_plot(struct Plot *p)
 	}
 	free(p);
 }
+
+int
+plot_get_chart_count(struct Plot *p)
+{
+	return p->chart_count;
+}
