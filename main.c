@@ -22,22 +22,35 @@ double scale = 1;
 char *err_msg = "\0";
 WINDOW *tarts_w;
 WINDOW *footer_w;
+short color_list[] = {
+	COLOR_BLUE,
+	COLOR_GREEN,
+	COLOR_CYAN,
+	COLOR_RED,
+	COLOR_MAGENTA,
+	COLOR_YELLOW,
+	COLOR_WHITE,
+};
+int color_used = 0;
 
 const char *argp_program_version = VERSION;
 const char *argp_program_bug_address = MANTAINER_EMAIL;
 static char doc[] = "Plot delicious Charts on the Terminal with T(CH)ARTS";
 static char args_doc[] = "[tarts]...";
 static struct argp_option options[] = {
-	/* arg name, flag, arg value, is optional, description */
-    { "line"   , 'l' ,     0     ,     0     , "Plot line chart."   },
-    { "pie"    , 'p' ,     0     ,     0     , "Plot pie chart."    },
-    { "bar"    , 'b' ,     0     ,     0     , "Plot bar chart."    },
-    { "file"   , 'f' , "filename",     0     , "Read charts from file" },
+	/* arg name, flag,   arg value   ,is optional,       description         */
+    { "type"   , 't' ,  "chart type" ,     0     , "[bar/pie/line]"           },
+    { "file"   , 'f' ,  "filename"   ,     0     , "Read charts from file"    },
+    { "label"  , 'l' , "chart label" ,     0     , "Give chart a label"       },
+	{ "values" , 'v' , "value list"  ,     0     , "List of values for chart" },
     { 0 }
 };
 
+/* TYPES */
 struct arguments {
-    enum { PIE, LINE, BAR } chart;
+    enum { NONE, PIECHART, LINECHART, BARCHART } chart;
+	char *label;
+	double val;
 };
 
 /* TODO */
@@ -45,6 +58,7 @@ void delete_chart(){return;}
 void add_new_chart(){return;}
 void show_commands_panel(){return;}
 
+/* FUNCTION DEFINITIONS */
 void
 show_cursor(int show)
 {
@@ -109,17 +123,30 @@ housekeeping(Canvas *s, Plot *p)
 void
 show_footer_info(void)
 {
-	mvwprintw(footer_w, 1, 1, "? to show help");
+	mvwprintw(footer_w, 1, 1, "?: Help | q: Quit Tarts | i: increase scale | d: decrease scale");
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = state->input;
     switch (key) {
-		case 'l': arguments->chart = LINE; break;
-		case 'p': arguments->chart = PIE; break;
-		case 'b': arguments->chart = BAR; break;
-		case ARGP_KEY_ARG: return 0;
-		default: return ARGP_ERR_UNKNOWN;
+		case 'l': arguments->label = arg;
+				  break;
+		case 't': switch (arg[0]) {
+					  case 'p': arguments->chart = PIECHART;
+								break;
+					  case 'l': arguments->chart = LINECHART;
+								break;
+					  default:
+					  case 'b': arguments->chart = BARCHART;
+								break;
+				  }
+				  break;
+		case 'v': arguments->val = str2double(arg);
+				  break;
+		case ARGP_KEY_ARG:
+			return 0;
+		default:
+			return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
@@ -130,8 +157,9 @@ int
 main(int argc, char *argv[])
 {
 	struct arguments arguments;
-
-    arguments.chart = LINE;
+	arguments.chart = NONE;
+	arguments.label = "";
+	arguments.val = 0;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -139,6 +167,7 @@ main(int argc, char *argv[])
 	init_tart();
 
 	int c = BLANK;
+	int did_add = 0;
 	int tarts_width = max_width;
 	int tarts_height = max_height - FOOTER_HEIGHT;
 	PlotStatus status = PLOT_OK;
@@ -151,6 +180,23 @@ main(int argc, char *argv[])
 	footer_w = create_new_win(FOOTER_HEIGHT, max_width, tarts_height, 0);
 
 	show_footer_info();
+
+	/* Plot chart specified on command line */
+	switch (arguments.chart) {
+		case PIECHART:
+			break;
+		case LINECHART:
+			break;
+		case BARCHART: ;
+			   Bar *b = new_bar(arguments.val, arguments.label);
+			   bar_set_color(b, color_list[color_used++]);
+			   did_add = plot_add_chart(plot, b, print_bar_chart);
+			   canvas_set_scale(canvas, (scale = (double)(tarts_height - PADDING) / arguments.val));
+			   break;
+		default:
+		case NONE:
+			   break;
+	}
 
 	/* TODO: move execution loop to a separate function */
 	do {

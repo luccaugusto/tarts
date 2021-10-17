@@ -5,6 +5,7 @@
 Plot charts on the terminal with ascii text
 
 ## TODO:
++ Add command line color command
 + parse command line args to create charts
 + make create charts command
 + print error message in a pretty way

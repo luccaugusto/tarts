@@ -24,3 +24,12 @@ double2str(double n)
 	sprintf(str, "%.2f", n);
 	return str;
 }
+
+double
+str2double(char *str)
+{
+	double d;
+	sscanf(str, "%lf", &d);
+
+	return d;
+}

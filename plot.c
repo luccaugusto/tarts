@@ -40,6 +40,17 @@ execute_plot(struct Plot *plot, WINDOW *w)
 	char *err_msg;
 	(void)err_msg;
 	canvas_clear(plot->canvas);
+
+	if (plot->chart_count == 0) {
+		mvwprintw(
+			w,
+			canvas_get_height(plot->canvas)/2,
+			canvas_get_width(plot->canvas)/4,
+			"No chart specified"
+		);
+		return;
+	}
+
 	for (int i=0; i<plot->chart_count; ++i) {
 		PlotStatus status = plot->chart_list[i].plot_function(
 				plot->chart_list[i].chart,
@@ -72,17 +83,18 @@ plot_set_canvas(struct Plot *p, Canvas *canvas)
 	p->canvas = canvas;
 }
 
-void
+int
 plot_add_chart(struct Plot *p, void *chart, PlotFunction plot_function)
 {
 	if (p->chart_count >= MAX_CHARTS)
-		return;
+		return 0;
 
 	struct ChartFunctionTuple cft;
 	cft.chart = chart;
 	cft.plot_function = plot_function;
 
 	p->chart_list[p->chart_count++] = cft;
+	return 1;
 }
 
 void
