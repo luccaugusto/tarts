@@ -7,13 +7,13 @@
 #include <ncurses.h>
 #include <errno.h>
 
-#include "utils.h"
-#include "constants.h"
-#include "canvas.h"
-#include "pie_chart.h"
-#include "bar_chart.h"
-#include "line_chart.h"
-#include "plot.h"
+#include "./utils.h"
+#include "./constants.h"
+#include "./canvas.h"
+#include "./pie_chart.h"
+#include "./bar_chart.h"
+#include "./line_chart.h"
+#include "./tart.h"
 
 /* GLOBAL VARIABLES  */
 int max_height;
@@ -111,13 +111,13 @@ init_tart(void)
 }
 
 void
-housekeeping(Canvas *s, Plot *p)
+housekeeping(Canvas *s, Tart *t)
 {
 	delwin(tarts_w);
 	delwin(footer_w);
 	if (s != NULL)
 		destroy_canvas(s);
-	destroy_plot(p);
+	destroy_tart(t);
 	show_cursor(1);
 	echo();
 	endwin();
@@ -179,10 +179,11 @@ main(int argc, char *argv[])
 	/* Borders ocupy one char on left, right, top and bottom */
 	Canvas *canvas = new_canvas(tarts_height-2, tarts_width-2);
 	canvas_set_scale(canvas, scale);
-	Plot *plot = new_plot(canvas);
 
 	tarts_w = create_new_win(tarts_height, tarts_width, 0, 0);
 	footer_w = create_new_win(FOOTER_HEIGHT, max_width, tarts_height, 0);
+
+	Tart *tart = new_tart(canvas, tarts_w);
 
 	show_footer_info();
 
@@ -195,7 +196,7 @@ main(int argc, char *argv[])
 		case BARCHART: ;
 			   Bar *b = new_bar(arguments.val, arguments.label);
 			   bar_set_color(b, color_list[color_used++]);
-			   did_add = plot_add_chart(plot, b, print_bar_chart);
+			   did_add = tart_add_chart(tart, b, print_bar_chart);
 			   canvas_set_scale(canvas, (scale = (double)(tarts_height - PADDING) / arguments.val));
 			   break;
 		default:
@@ -204,14 +205,14 @@ main(int argc, char *argv[])
 	}
 
 	if (! arguments.interactive) {
-		if (plot_get_chart_count(plot) > 0) {
-			execute_plot(plot, tarts_w);
-			housekeeping(NULL, plot);
+		if (tart_get_chart_count(tart) > 0) {
+			bake(tart);
+			housekeeping(NULL, tart);
 			print_canvas(canvas);
 			destroy_canvas(canvas);
 		} else {
-			housekeeping(canvas,plot);
-			printf("No charts to plot.\n");
+			housekeeping(canvas,tart);
+			printf("No charts to tart.\n");
 		}
 		return 0;
 	}
@@ -240,12 +241,12 @@ main(int argc, char *argv[])
 				//NOP
 				break;
 		};
-		execute_plot(plot, tarts_w);
+		bake(tart);
 		wrefresh(tarts_w);
 		wrefresh(footer_w);
 		doupdate();
 	} while ((c = wgetch(tarts_w)) != 'q');
 
-	housekeeping(canvas, plot);
+	housekeeping(canvas, tart);
 	return status;
 }
