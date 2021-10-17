@@ -122,7 +122,7 @@ canvas_clear(struct Canvas *s)
 	while (n) c[n--] = BLANK;
 
 	Color *colors_fg = s->colors_fg;
-	while (n2) colors_fg[n2--] = COLOR_RED;
+	while (n2) colors_fg[n2--] = COLOR_BLANK;
 }
 
 struct Canvas *
