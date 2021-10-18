@@ -16,13 +16,13 @@ data on the terminal.
 Bellow is a list of goals of this application.
 
 ## Goals:
-[OK] Be able to plot bar, line and pie charts
-[OK] Plot chart non iteractivelly to the terminal and exit
-[  ] Be able to create charts with command line arguments
-[  ] Be able to create new charts interactivelly
-[  ] Create charts from CSV
-[  ] Multiple panels to handle multiple chart views
-[  ] Basic reports based on charts (total, average, minimum, maximum)
+-[x] Be able to plot bar, line and pie charts
+-[x] Plot chart non iteractivelly to the terminal and exit
+-[] Be able to create charts with command line arguments
+-[] Be able to create new charts interactivelly
+-[] Create charts from CSV
+-[] Multiple panels to handle multiple chart views
+-[] Basic reports based on charts (total, average, minimum, maximum)
 
 ## TODO:
 This is a list of the features being developed currently.
