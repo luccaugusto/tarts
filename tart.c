@@ -86,6 +86,12 @@ tart_set_canvas(struct Tart *t, Canvas *canvas)
 	t->canvas = canvas;
 }
 
+Canvas *
+tart_get_canvas(struct Tart *t)
+{
+	return t->canvas;
+}
+
 int
 tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function)
 {

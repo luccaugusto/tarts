@@ -49,9 +49,12 @@ static struct argp_option options[] = {
 
 /* TYPES */
 struct arguments {
-    enum { NONE, PIECHART, LINECHART, BARCHART } chart;
-	char *label;
-	double val;
+	enum {NONE, PIECHART, LINECHART, BARCHART} charts[MAX_CHARTS];
+	int charts_count;
+	char *labels[MAX_CHARTS];
+	int labels_count;
+	double values[MAX_CHARTS];
+	int values_count;
 	int interactive;
 };
 
@@ -132,19 +135,19 @@ show_footer_info(void)
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = state->input;
     switch (key) {
-		case 'l': arguments->label = arg;
+		case 'l': arguments->labels[arguments->labels_count++] = arg;
 				  break;
 		case 't': switch (arg[0]) {
-					  case 'p': arguments->chart = PIECHART;
+					  case 'p': arguments->charts[arguments->charts_count++] = PIECHART;
 								break;
-					  case 'l': arguments->chart = LINECHART;
+					  case 'l': arguments->charts[arguments->charts_count++] = LINECHART;
 								break;
 					  default:
-					  case 'b': arguments->chart = BARCHART;
+					  case 'b': arguments->charts[arguments->charts_count++] = BARCHART;
 								break;
 				  }
 				  break;
-		case 'v': arguments->val = str2double(arg);
+		case 'v': arguments->values[arguments->values_count++] = str2double(arg);
 				  break;
 		case 'i': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
@@ -154,17 +157,42 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     }
     return 0;
 }
-
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
+
+/* Plot charts specified on command line */
+void
+prepare_cmd_line_tarts(struct arguments *arguments, double *max_value, int tarts_height, Tart *tart)
+{
+	for (int i=0; i<arguments->charts_count; ++i) {
+		if (arguments->values[i] > *max_value)
+			*max_value = arguments->values[i];
+		switch (arguments->charts[i]) {
+			case PIECHART:
+				break;
+			case LINECHART:
+				break;
+			case BARCHART: ;
+						   Bar *b = new_bar(arguments->values[i], arguments->labels[i]);
+						   bar_set_color(b, color_list[color_used++]);
+						   tart_add_chart(tart, b, print_bar_chart);
+						   break;
+			default:
+			case NONE:
+						   break;
+		}
+	}
+
+	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+}
 
 int
 main(int argc, char *argv[])
 {
 	struct arguments arguments;
-	arguments.chart = NONE;
-	arguments.label = "";
-	arguments.val = 0;
 	arguments.interactive = 1;
+	arguments.values_count = 0;
+	arguments.charts_count = 0;
+	arguments.labels_count = 0;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -175,6 +203,7 @@ main(int argc, char *argv[])
 	int did_add = 0;
 	int tarts_width = max_width;
 	int tarts_height = max_height - FOOTER_HEIGHT;
+	double max_value = 0;
 	PlotStatus status = PLOT_OK;
 	/* Borders ocupy one char on left, right, top and bottom */
 	Canvas *canvas = new_canvas(tarts_height-2, tarts_width-2);
@@ -187,22 +216,7 @@ main(int argc, char *argv[])
 
 	show_footer_info();
 
-	/* Plot chart specified on command line */
-	switch (arguments.chart) {
-		case PIECHART:
-			break;
-		case LINECHART:
-			break;
-		case BARCHART: ;
-			   Bar *b = new_bar(arguments.val, arguments.label);
-			   bar_set_color(b, color_list[color_used++]);
-			   did_add = tart_add_chart(tart, b, print_bar_chart);
-			   canvas_set_scale(canvas, (scale = (double)(tarts_height - PADDING) / arguments.val));
-			   break;
-		default:
-		case NONE:
-			   break;
-	}
+	prepare_cmd_line_tarts(&arguments, &max_value, tarts_height, tart);
 
 	if (! arguments.interactive) {
 		if (tart_get_chart_count(tart) > 0) {
