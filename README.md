@@ -17,7 +17,7 @@ Bellow is a list of goals of this application.
 
 ## Goals:
 + [x] Be able to plot bar, line and pie charts
-+ [x] Plot chart non iteractivelly to the terminal and exit
++ [x] Plot chart non interactivelly to the terminal and exit
 + [ ] Be able to create charts with command line arguments
 + [ ] Be able to create new charts interactivelly
 + [ ] Create charts from CSV
