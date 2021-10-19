@@ -39,21 +39,21 @@ static char doc[] = "Plot delicious Charts on the Terminal with T(CH)ARTS";
 static char args_doc[] = "[tarts]...";
 static struct argp_option options[] = {
 	/* arg name, flag,   arg value   ,is optional,       description         */
-	{ "type"        , 't' ,  "chart type" ,     0     , "[bar/pie/line]"           },
-	{ "file"        , 'f' ,  "filename"   ,     0     , "Read charts from file"    },
-	{ "label"       , 'l' , "chart label" ,     0     , "Give chart a label"       },
-	{ "values"      , 'v' , "value list"  ,     0     , "List of values for chart" },
-	{ "interactive" , 'i' ,       0       ,     0     , "Disable interactive mode" },
+	{ "type"            , 't' ,  "chart type" ,     0     , "[bar/pie/line]"                },
+	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"         },
+	{ "label"           , 'l' , "chart label" ,     0     , "Give chart a label"            },
+	{ "values"          , 'v' , "value list"  ,     0     , "csv list of doubles for chart" },
+	{ "non interactive" , 'n' ,       0       ,     0     , "Disable interactive mode"      },
 	{ 0 }
 };
 
 /* TYPES */
-struct arguments {
+struct Arguments {
 	enum {NONE, PIECHART, LINECHART, BARCHART} charts[MAX_CHARTS];
 	int charts_count;
 	char *labels[MAX_CHARTS];
 	int labels_count;
-	double values[MAX_CHARTS];
+	struct ValueList values[MAX_CHARTS];
 	int values_count;
 	int interactive;
 };
@@ -133,7 +133,7 @@ show_footer_info(void)
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
-    struct arguments *arguments = state->input;
+    struct Arguments *arguments = state->input;
     switch (key) {
 		case 'l': arguments->labels[arguments->labels_count++] = arg;
 				  break;
@@ -147,9 +147,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 								break;
 				  }
 				  break;
-		case 'v': arguments->values[arguments->values_count++] = str2double(arg);
+		case 'v': arguments->values[arguments->values_count++] = *parse_values(arg);
 				  break;
-		case 'i': arguments->interactive = 0;
+		case 'n': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
 			return 0;
 		default:
@@ -161,21 +161,27 @@ static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
 /* Plot charts specified on command line */
 void
-prepare_cmd_line_tarts(struct arguments *arguments, double *max_value, int tarts_height, Tart *tart)
+prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart)
 {
+	/* TODO: check if all values are set before adding to tart */
 	for (int i=0; i<arguments->charts_count; ++i) {
-		if (arguments->values[i] > *max_value)
-			*max_value = arguments->values[i];
+		for (int j=0; j<arguments->values[i].count_values; ++j) {
+			if (arguments->values[i].values[j] > *max_value)
+				*max_value = arguments->values[i].values[j];
+		}
 		switch (arguments->charts[i]) {
-			case PIECHART:
+			case PIECHART: ; /* empty statement because the language requires */
 				break;
-			case LINECHART:
+			case LINECHART: ; /* empty statement because the language requires */
+							Line *l = new_line(arguments->values[i].values, arguments->labels[i], canvas_get_width(tart_get_canvas(tart)), arguments->values[i].count_values);
+							line_set_color(l, color_list[color_used++]);/* TODO: boundary checks */
+							tart_add_chart(tart, l, print_line_chart);
 				break;
-			case BARCHART: ;
-						   Bar *b = new_bar(arguments->values[i], arguments->labels[i]);
-						   bar_set_color(b, color_list[color_used++]);
+			case BARCHART: ; /* empty statement because the language requires */
+						   Bar *b = new_bar(arguments->values[i].values[0], arguments->labels[i]);
+						   bar_set_color(b, color_list[color_used++]);/* TODO: boundary checks */
 						   tart_add_chart(tart, b, print_bar_chart);
-						   break;
+			   break;
 			default:
 			case NONE:
 						   break;
@@ -188,7 +194,7 @@ prepare_cmd_line_tarts(struct arguments *arguments, double *max_value, int tarts
 int
 main(int argc, char *argv[])
 {
-	struct arguments arguments;
+	struct Arguments arguments;
 	arguments.interactive = 1;
 	arguments.values_count = 0;
 	arguments.charts_count = 0;
