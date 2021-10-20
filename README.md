@@ -31,3 +31,4 @@ This is a list of the features being developed currently.
 + parse command line args to create more than one chart
 + make create charts interactive command
 + print error message in a pretty way
++ use ISO escape sequences

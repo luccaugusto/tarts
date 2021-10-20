@@ -41,8 +41,8 @@ static struct argp_option options[] = {
 	/* arg name, flag,   arg value   ,is optional,       description         */
 	{ "type"            , 't' ,  "chart type" ,     0     , "[bar/pie/line]"                },
 	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"         },
-	{ "label"           , 'l' , "chart label" ,     0     , "Give chart a label"            },
-	{ "values"          , 'v' , "value list"  ,     0     , "csv list of doubles for chart" },
+	{ "labels"          , 'l' , "chart labels",     0     , "Csv list of strings for labels"},
+	{ "values"          , 'v' , "value list"  ,     0     , "Csv list of doubles for chart" },
 	{ "non interactive" , 'n' ,       0       ,     0     , "Disable interactive mode"      },
 	{ 0 }
 };

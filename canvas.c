@@ -166,9 +166,7 @@ canvas_clear(struct Canvas *s)
 	int n = canvas_get_height(s) * canvas_get_width(s) - 1;
 	int n2 = n;
 	while (n >= 0) c[n--] = BLANK;
-
-	Color *colors_fg = s->colors_fg;
-	while (n2 >= 0) colors_fg[n2--] = COLOR_BLANK;
+	while (n2 >= 0) s->colors_fg[n2--] = COLOR_BLANK;
 }
 
 struct Canvas *
