@@ -20,3 +20,4 @@ char *int2str(int n);
 char *double2str(double n);
 double str2double(char *str);
 struct ValueList *parse_values(char *value_string);
+struct LabelList *parse_labels(char *label_string);

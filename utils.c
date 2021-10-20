@@ -59,15 +59,54 @@ parse_values(char *value_string)
 		if (value_string[i] == ',') {
 			/* copy to aux value until ,*/
 			strncpy(aux, &value_string[old_i], i-old_i);
+			aux[i-old_i] = '\0';
 			vlist->values[parsed_values++] = str2double(aux);
 			old_i = i+1; /* skip the , */
 		}
 
 		if (i + 1 == string_len) {
 			strncpy(aux, &value_string[old_i], string_len-old_i);
+			aux[string_len-old_i] = '\0';
 			vlist->values[parsed_values++] = str2double(aux);
 		}
 	}
 	free(aux);
 	return vlist;
+}
+
+struct LabelList *
+parse_labels(char *label_string)
+{
+	/* there is one less , for the number of labels on a csv list */
+	char *aux;
+	int old_i = 0;
+	int count_labels = 1;
+	int parsed_labels = 0;
+	int string_len = strlen(label_string);
+	struct LabelList *llist = malloc(sizeof(struct LabelList));
+
+	for (int i=0; i<string_len; ++i) {
+		if (label_string[i] == ',')
+			count_labels++;
+	}
+
+	llist->labels = malloc(sizeof(char *) * count_labels);
+	llist->count_labels = count_labels;
+
+	for (int i=0; i<string_len; ++i) {
+		if (label_string[i] == ',') {
+			/* copy to aux value until ,*/
+			aux = malloc(sizeof(char) * i-old_i);
+			strncpy(aux, &label_string[old_i], i-old_i);
+			llist->labels[parsed_labels++] = aux;
+			old_i = i+1; /* skip the , */
+		}
+
+		if (i + 1 == string_len) {
+			aux = malloc(sizeof(char) * string_len-old_i);
+			strncpy(aux, &label_string[old_i], string_len-old_i);
+			llist->labels[parsed_labels++] = aux;
+		}
+	}
+	return llist;
 }

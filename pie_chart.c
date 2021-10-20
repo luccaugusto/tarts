@@ -9,6 +9,7 @@
 
 struct Portion {
 	int percentage;
+	double value;
 	char *name;
 	Color color;
 };
@@ -112,9 +113,8 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 	double top_y = center_y - scaled_radius;
 	double bottom_y = center_y + scaled_radius;
 	double radius_sqr = scaled_radius*scaled_radius;
-	int labels_x_offset = (center_x < width/2) ? PIE_OFFSET : width - PIE_OFFSET - 10;
+	int labels_x_offset = PADDING / 2;
 	int circle_x, circle_y, pos;
-	int i=0;
 	struct Portion portion;
 
 	char *aux = malloc(sizeof(char) * width * height * 2);
@@ -162,26 +162,22 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 				canvas_colors[pos] = pie->color_by_angle_map[(int)angle];
 			}
 		}
+	}
 
-		/* print labels */
-		if (i < pie->count_portions) {
-			portion = pie->portion_stack[i];
-			length = snprintf(NULL, 0, "%s %d%% ", portion.name, portion.percentage);
-			pos = (i + height/2 - pie->count_portions/2) * width + labels_x_offset;
+	/* print labels */
+	aux = malloc(sizeof(char) * MAX_NAME_LENGTH * 2);
+	pos = (height-1) * width + labels_x_offset;
+	for (int i=0; i < pie->count_portions; ++i) {
+		portion = pie->portion_stack[i];
 
-			snprintf(
-					&canvas_screen[pos],
-					length,
-					"%s %d%% ",
-					portion.name,
-					portion.percentage
-					);
+		snprintf(aux, MAX_NAME_LENGTH * 2, "%s %.2f(%d%%)", portion.name, portion.value, portion.percentage);
+		length = strlen(aux);
+		strncpy(&canvas_screen[pos], aux, length);
 
-			/* color it */
-			for (int j=0; j < length; ++j)
-				canvas_colors[pos + j] = portion.color;
-			++i;
-		}
+		/* color it */
+		for (int j=0; j < length; ++j)
+			canvas_colors[pos + j] = portion.color;
+		pos += length + 1;
 	}
 	free(aux);
 	return 0;
@@ -203,11 +199,12 @@ new_pie(double center_y, double center_x, double radius)
 }
 
 struct Portion *
-new_portion(int percentage, char *name, Color color)
+new_portion(int percentage, double value, char *name, Color color)
 {
 	struct Portion *p = malloc(sizeof(struct Portion));
 	p->percentage = percentage;
 	p->name = name;
+	p->value = value;
 	p->color = color;
 
 	return p;
@@ -242,8 +239,9 @@ pie_push_portion(Pie *pie, struct Portion *portion)
 	if (pie->color_map_color_count + portion_degree_count > CIRCLE_DEGREE_COUNT)
 		return;
 
-	/* mark in which angles the portion is */
 	pie->portion_stack[pie->count_portions++] = *portion;
+
+	/* mark in which angles the portion is */
 	int end_angle = pie->color_map_color_count + portion_degree_count;
 	for (int i=pie->color_map_color_count; i < end_angle; ++i)
 		pie->color_by_angle_map[i] = portion->color;

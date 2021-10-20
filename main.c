@@ -51,7 +51,7 @@ static struct argp_option options[] = {
 struct Arguments {
 	enum {NONE, PIECHART, LINECHART, BARCHART} charts[MAX_CHARTS];
 	int charts_count;
-	char *labels[MAX_CHARTS];
+	struct LabelList labels[MAX_CHARTS];
 	int labels_count;
 	struct ValueList values[MAX_CHARTS];
 	int values_count;
@@ -135,8 +135,9 @@ show_footer_info(void)
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct Arguments *arguments = state->input;
     switch (key) {
-		case 'l': arguments->labels[arguments->labels_count++] = arg;
+		case 'l': arguments->labels[arguments->labels_count++] = *parse_labels(arg);
 				  break;
+				  /* TODO: check if arg has a value */
 		case 't': switch (arg[0]) {
 					  case 'p': arguments->charts[arguments->charts_count++] = PIECHART;
 								break;
@@ -165,30 +166,71 @@ prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts
 {
 	/* TODO: check if all values are set before adding to tart */
 	for (int i=0; i<arguments->charts_count; ++i) {
-		for (int j=0; j<arguments->values[i].count_values; ++j) {
-			if (arguments->values[i].values[j] > *max_value)
-				*max_value = arguments->values[i].values[j];
-		}
 		switch (arguments->charts[i]) {
 			case PIECHART: ; /* empty statement because the language requires */
+						   int *percentage = malloc(sizeof(int) * arguments->values[i].count_values);
+						   int total = 0;
+						   /* TODO: check if count_values == count_labels */
+						   Pie *p = new_pie(
+							   canvas_get_height(tart_get_canvas(tart))/2,
+							   canvas_get_width(tart_get_canvas(tart))/4,
+							   DEFAULT_RADIUS
+							);
+						   /* calculate each value's percentage */
+						   for (int j=0; j<arguments->values[i].count_values; ++j)
+							   total += arguments->values[i].values[j];
+
+						   for (int j=0; j<arguments->values[i].count_values; ++j)
+							   percentage[j] = arguments->values[i].values[j] / total * 100;
+
+						   for (int j=0; j<arguments->values[i].count_values; ++j) {
+							   pie_push_portion(p,
+									   new_portion(
+										   percentage[j],
+										   arguments->values[i].values[j],
+										   arguments->labels[i].labels[j],
+										   color_list[color_used++]
+										)
+								);
+						   }
+						   tart_add_chart(tart, p, print_pie);
 				break;
 			case LINECHART: ; /* empty statement because the language requires */
-							Line *l = new_line(arguments->values[i].values, arguments->labels[i], canvas_get_width(tart_get_canvas(tart)), arguments->values[i].count_values);
+							/* get max value for scale */
+							for (int j=0; j<arguments->values[i].count_values; ++j) {
+								if (arguments->values[i].values[j] > *max_value)
+									*max_value = arguments->values[i].values[j];
+							}
+							Line *l = new_line(
+								arguments->values[i].values,
+								arguments->labels[i].labels[0],
+								canvas_get_width(tart_get_canvas(tart)),
+								arguments->values[i].count_values
+							);
 							line_set_color(l, color_list[color_used++]);/* TODO: boundary checks */
 							tart_add_chart(tart, l, print_line_chart);
-				break;
+							canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+						break;
 			case BARCHART: ; /* empty statement because the language requires */
-						   Bar *b = new_bar(arguments->values[i].values[0], arguments->labels[i]);
+						   /* get max value for scale */
+							for (int j=0; j<arguments->values[i].count_values; ++j) {
+								if (arguments->values[i].values[j] > *max_value)
+									*max_value = arguments->values[i].values[j];
+							}
+						   Bar *b = new_bar(
+							   arguments->values[i].values[0],
+							   arguments->labels[i].labels[0]
+							);
 						   bar_set_color(b, color_list[color_used++]);/* TODO: boundary checks */
 						   tart_add_chart(tart, b, print_bar_chart);
-			   break;
+						   canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+						break;
 			default:
 			case NONE:
-						   break;
+						break;
 		}
 	}
 
-	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
 }
 
 int
