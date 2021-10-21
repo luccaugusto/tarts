@@ -25,10 +25,13 @@ Bellow is a list of goals of this application.
 + [ ] Basic reports based on charts (total, average, minimum, maximum)
 
 ## Usage:
-Tarts can be created via command line args. For a complete list of arguments and their descriptions, run ```tart --help```.
-The main arguments used are ```-t```(type), which specifies the type of the chart ```pie|line|bar```;
-```-v```(values), which is a comma spaced list of values for the charts, in case of bar charts only the first value is used;
-and ```-l```(labels), which is a comma spaced list of labels for the values in the charts, in case of line and bar charts
+Tarts can be created via command line args.
+
+For a complete list of arguments and their descriptions, run ```tart --help```.
+The main arguments used are:
++ ```-t```(type), which specifies the type of the chart ```pie|line|bar```;
++ ```-v```(values), which is a comma spaced list of values for the charts, in case of bar charts only the first value is used;
++ and ```-l```(labels), which is a comma spaced list of labels for the values in the charts, in case of line and bar charts
 only the first value is used.
 
 ### Examples:
