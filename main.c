@@ -43,6 +43,7 @@ static struct argp_option options[] = {
 	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"         },
 	{ "labels"          , 'l' , "chart labels",     0     , "Csv list of strings for labels"},
 	{ "values"          , 'v' , "value list"  ,     0     , "Csv list of doubles for chart" },
+	{ "radius"          , 'r' , "radius value",     0     , "Value for pie chart radius"    },
 	{ "non interactive" , 'n' ,       0       ,     0     , "Disable interactive mode"      },
 	{ 0 }
 };
@@ -56,6 +57,7 @@ struct Arguments {
 	struct ValueList values[MAX_CHARTS];
 	int values_count;
 	int interactive;
+	int radius;
 };
 
 /* TODO */
@@ -150,6 +152,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 				  break;
 		case 'v': arguments->values[arguments->values_count++] = *parse_values(arg);
 				  break;
+		case 'r': arguments->radius = (int)str2double(arg);
+				  break;
 		case 'n': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
 			return 0;
@@ -160,77 +164,93 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 }
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
+void
+create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
+{
+	int *percentage = malloc(sizeof(int) * arguments->values[index].count_values);
+	int total = 0;
+	/* TODO: check if count_values == count_labels */
+	Pie *p = new_pie(
+			canvas_get_height(tart_get_canvas(tart))/2,
+			canvas_get_width(tart_get_canvas(tart))/4,
+			arguments->radius
+			);
+	/* calculate each value's percentage */
+	for (int j=0; j<arguments->values[index].count_values; ++j)
+		total += arguments->values[index].values[j];
+
+	for (int j=0; j<arguments->values[index].count_values; ++j)
+		percentage[j] = arguments->values[index].values[j] / total * 100;
+
+	for (int j=0; j<arguments->values[index].count_values; ++j) {
+		pie_push_portion(p,
+			new_portion(
+				percentage[j],
+				arguments->values[index].values[j],
+				arguments->labels[index].labels[j],
+				color_list[color_used++]
+			)
+		);
+	}
+	tart_add_chart(tart, p, print_pie);
+}
+
+void
+create_line_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
+{
+	/* get max value for scale */
+	for (int j=0; j<arguments->values[index].count_values; ++j) {
+		if (arguments->values[index].values[j] > *max_value)
+			*max_value = arguments->values[index].values[j];
+	}
+	Line *l = new_line(
+			arguments->values[index].values,
+			arguments->labels[index].labels[0],
+			canvas_get_width(tart_get_canvas(tart)),
+			arguments->values[index].count_values
+			);
+	line_set_color(l, color_list[color_used++]);/* TODO: boundary checks */
+	tart_add_chart(tart, l, print_line_chart);
+	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+}
+
+void
+create_bar_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
+{
+	/* get max value for scale */
+	for (int j=0; j<arguments->values[index].count_values; ++j) {
+		if (arguments->values[index].values[j] > *max_value)
+			*max_value = arguments->values[index].values[j];
+	}
+	Bar *b = new_bar(
+			arguments->values[index].values[0],
+			arguments->labels[index].labels[0]
+			);
+	bar_set_color(b, color_list[color_used++]);/* TODO: boundary checks */
+	tart_add_chart(tart, b, print_bar_chart);
+	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+}
+
 /* Plot charts specified on command line */
 void
 prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart)
 {
-	/* TODO: check if all values are set before adding to tart */
 	for (int i=0; i<arguments->charts_count; ++i) {
 		switch (arguments->charts[i]) {
-			case PIECHART: ; /* empty statement because the language requires */
-						   int *percentage = malloc(sizeof(int) * arguments->values[i].count_values);
-						   int total = 0;
-						   /* TODO: check if count_values == count_labels */
-						   Pie *p = new_pie(
-							   canvas_get_height(tart_get_canvas(tart))/2,
-							   canvas_get_width(tart_get_canvas(tart))/4,
-							   DEFAULT_RADIUS
-							);
-						   /* calculate each value's percentage */
-						   for (int j=0; j<arguments->values[i].count_values; ++j)
-							   total += arguments->values[i].values[j];
-
-						   for (int j=0; j<arguments->values[i].count_values; ++j)
-							   percentage[j] = arguments->values[i].values[j] / total * 100;
-
-						   for (int j=0; j<arguments->values[i].count_values; ++j) {
-							   pie_push_portion(p,
-									   new_portion(
-										   percentage[j],
-										   arguments->values[i].values[j],
-										   arguments->labels[i].labels[j],
-										   color_list[color_used++]
-										)
-								);
-						   }
-						   tart_add_chart(tart, p, print_pie);
+			case PIECHART:
+				create_pie_from_args(arguments, tart, i);
 				break;
-			case LINECHART: ; /* empty statement because the language requires */
-							/* get max value for scale */
-							for (int j=0; j<arguments->values[i].count_values; ++j) {
-								if (arguments->values[i].values[j] > *max_value)
-									*max_value = arguments->values[i].values[j];
-							}
-							Line *l = new_line(
-								arguments->values[i].values,
-								arguments->labels[i].labels[0],
-								canvas_get_width(tart_get_canvas(tart)),
-								arguments->values[i].count_values
-							);
-							line_set_color(l, color_list[color_used++]);/* TODO: boundary checks */
-							tart_add_chart(tart, l, print_line_chart);
-							canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
-						break;
-			case BARCHART: ; /* empty statement because the language requires */
-						   /* get max value for scale */
-							for (int j=0; j<arguments->values[i].count_values; ++j) {
-								if (arguments->values[i].values[j] > *max_value)
-									*max_value = arguments->values[i].values[j];
-							}
-						   Bar *b = new_bar(
-							   arguments->values[i].values[0],
-							   arguments->labels[i].labels[0]
-							);
-						   bar_set_color(b, color_list[color_used++]);/* TODO: boundary checks */
-						   tart_add_chart(tart, b, print_bar_chart);
-						   canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
-						break;
+			case LINECHART:
+				create_line_from_args(arguments, max_value, tarts_height, tart, i);
+				break;
+			case BARCHART:
+				create_bar_from_args(arguments, max_value, tarts_height, tart, i);
+				break;
 			default:
 			case NONE:
-						break;
+				break;
 		}
 	}
-
 }
 
 int
@@ -241,6 +261,7 @@ main(int argc, char *argv[])
 	arguments.values_count = 0;
 	arguments.charts_count = 0;
 	arguments.labels_count = 0;
+	arguments.radius = MAX_RADIUS;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -248,7 +269,6 @@ main(int argc, char *argv[])
 	init_tart();
 
 	int c = BLANK;
-	int did_add = 0;
 	int tarts_width = max_width;
 	int tarts_height = max_height - FOOTER_HEIGHT;
 	double max_value = 0;

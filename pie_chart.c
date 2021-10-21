@@ -147,7 +147,7 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 			/* Color portions */
 			circle_x = x - center_x;
 			circle_y = y - center_y;
-			if (circle_x*circle_x + circle_y*circle_y <= scaled_radius*scaled_radius) {
+			if (circle_x*circle_x + circle_y*circle_y < scaled_radius*scaled_radius) {
 				/* avoid NaNs */
 				if ((divisor = circle_x + sqrt(circle_x*circle_x + circle_y*circle_y)) != 0) {
 					radians = 2 * atan(circle_y/divisor);

@@ -4,7 +4,7 @@
 #define PIE_OFFSET            1.5
 #define MAX_PORTIONS          100
 #define CIRCLE_DEGREE_COUNT   360
-#define DEFAULT_RADIUS        15
+#define MAX_RADIUS            12 /* radius > 14 breaks colors for some reason */
 
 typedef enum {
 	PIEBLOCK_FULL   = 'O',
