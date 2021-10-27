@@ -14,6 +14,7 @@
 #include "./bar_chart.h"
 #include "./line_chart.h"
 #include "./tart.h"
+#include "./cli_tart.h"
 
 /* GLOBAL VARIABLES  */
 int max_height;
