@@ -31,6 +31,7 @@ short color_list[] = {
 	COLOR_YELLOW,
 	COLOR_WHITE,
 };
+int count_color = 7;
 int color_used = 0;
 
 const char *argp_program_version = VERSION;
@@ -59,11 +60,6 @@ struct Arguments {
 	int interactive;
 	int radius;
 };
-
-/* TODO */
-void delete_chart(){return;}
-void add_new_chart(){return;}
-void show_commands_panel(){return;}
 
 /* FUNCTION DEFINITIONS */
 void
@@ -116,6 +112,22 @@ init_tart(void)
 }
 
 void
+tart_error(PlotStatus status)
+{
+	switch (status) {
+		case ERR_ARGS_COUNT_DONT_MATCH:
+			printf("Number of values does not match number of labels\n");
+			break;
+		case ERR_TOO_MANY_CHARTS:
+			printf("Number of charts exceeded maximum number of charts (%d)\n", MAX_CHARTS);
+			break;
+		default:
+			break;
+	}
+	exit(status);
+}
+
+void
 housekeeping(Canvas *s, Tart *t)
 {
 	delwin(tarts_w);
@@ -136,10 +148,10 @@ show_footer_info(void)
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct Arguments *arguments = state->input;
+	int r;
     switch (key) {
 		case 'l': arguments->labels[arguments->labels_count++] = *parse_labels(arg);
 				  break;
-				  /* TODO: check if arg has a value */
 		case 't': switch (arg[0]) {
 					  case 'p': arguments->charts[arguments->charts_count++] = PIECHART;
 								break;
@@ -152,7 +164,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 				  break;
 		case 'v': arguments->values[arguments->values_count++] = *parse_values(arg);
 				  break;
-		case 'r': arguments->radius = (int)str2double(arg);
+		case 'r': r = (int)str2double(arg);
+				  arguments->radius = r > MAX_RADIUS ? MAX_RADIUS : r;
 				  break;
 		case 'n': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
@@ -164,12 +177,15 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 }
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
-void
+PlotStatus
 create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 {
 	int *percentage = malloc(sizeof(int) * arguments->values[index].count_values);
 	int total = 0;
-	/* TODO: check if count_values == count_labels */
+	/* number of values and labels do not match */
+	if (arguments->values[index].count_values != arguments->labels[index].count_labels)
+		return ERR_ARGS_COUNT_DONT_MATCH;
+
 	Pie *p = new_pie(
 			canvas_get_height(tart_get_canvas(tart))/2,
 			canvas_get_width(tart_get_canvas(tart))/4,
@@ -188,14 +204,17 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 				percentage[j],
 				arguments->values[index].values[j],
 				arguments->labels[index].labels[j],
-				color_list[color_used++]
+				color_list[color_used]
 			)
 		);
+		/* just cicle on list to allow more than 7 portions */
+		color_used = (color_used + 1) % count_color;
 	}
 	tart_add_chart(tart, p, print_pie);
+	return PLOT_OK;
 }
 
-void
+PlotStatus
 create_line_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
 {
 	/* get max value for scale */
@@ -209,12 +228,14 @@ create_line_from_args(struct Arguments *arguments, double *max_value, int tarts_
 			canvas_get_width(tart_get_canvas(tart)),
 			arguments->values[index].count_values
 			);
-	line_set_color(l, color_list[color_used++]);/* TODO: boundary checks */
+	line_set_color(l, color_list[color_used]);
+	/* just cicle on list to allow more than 7 charts */
+	color_used = (color_used + 1) % count_color;
 	tart_add_chart(tart, l, print_line_chart);
-	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+	return PLOT_OK;
 }
 
-void
+PlotStatus
 create_bar_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
 {
 	/* get max value for scale */
@@ -226,31 +247,39 @@ create_bar_from_args(struct Arguments *arguments, double *max_value, int tarts_h
 			arguments->values[index].values[0],
 			arguments->labels[index].labels[0]
 			);
-	bar_set_color(b, color_list[color_used++]);/* TODO: boundary checks */
+
+	bar_set_color(b, color_list[color_used]);
+	/* just cicle on list to allow more than 7 charts */
+	color_used = (color_used + 1) % count_color;
 	tart_add_chart(tart, b, print_bar_chart);
-	canvas_set_scale(tart_get_canvas(tart), (scale = (double)(tarts_height - PADDING) / *max_value));
+	return PLOT_OK;
 }
 
 /* Plot charts specified on command line */
-void
+PlotStatus
 prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart)
 {
+	PlotStatus ret_code = PLOT_OK;
+	if (arguments->charts_count > MAX_CHARTS)
+		return ERR_TOO_MANY_CHARTS;
+
 	for (int i=0; i<arguments->charts_count; ++i) {
 		switch (arguments->charts[i]) {
 			case PIECHART:
-				create_pie_from_args(arguments, tart, i);
+				ret_code = create_pie_from_args(arguments, tart, i);
 				break;
 			case LINECHART:
-				create_line_from_args(arguments, max_value, tarts_height, tart, i);
+				ret_code = create_line_from_args(arguments, max_value, tarts_height, tart, i);
 				break;
 			case BARCHART:
-				create_bar_from_args(arguments, max_value, tarts_height, tart, i);
+				ret_code = create_bar_from_args(arguments, max_value, tarts_height, tart, i);
 				break;
 			default:
 			case NONE:
 				break;
 		}
 	}
+	return ret_code;
 }
 
 int
@@ -268,13 +297,13 @@ main(int argc, char *argv[])
 	/* Begin */
 	init_tart();
 
-	int c = BLANK;
 	int tarts_width = max_width;
 	int tarts_height = max_height - FOOTER_HEIGHT;
-	double max_value = 0;
+	double max_value = tarts_height;
 	PlotStatus status = PLOT_OK;
 	/* Borders ocupy one char on left, right, top and bottom */
 	Canvas *canvas = new_canvas(tarts_height-2, tarts_width-2);
+	scale = (tarts_height-PADDING) / max_value;
 	canvas_set_scale(canvas, scale);
 
 	tarts_w = create_new_win(tarts_height, tarts_width, 0, 0);
@@ -284,9 +313,16 @@ main(int argc, char *argv[])
 
 	show_footer_info();
 
-	prepare_cmd_line_tarts(&arguments, &max_value, tarts_height, tart);
+	if ((status = prepare_cmd_line_tarts(&arguments, &max_value, tarts_height, tart)) != PLOT_OK) {
+		housekeeping(canvas,tart);
+		tart_error(status);
+	}
 
-	if (! arguments.interactive) {
+	if (arguments.interactive) {
+		execution_loop(tart, tarts_w, footer_w, scale);
+	}
+
+	else {
 		if (tart_get_chart_count(tart) > 0) {
 			bake(tart);
 			housekeeping(NULL, tart);
@@ -296,38 +332,7 @@ main(int argc, char *argv[])
 			housekeeping(canvas,tart);
 			printf("No charts to tart.\n");
 		}
-		return 0;
 	}
-
-	/* TODO: move execution loop to a separate function */
-	do {
-		switch (c) {
-			case '?':
-				show_commands_panel();
-				break;
-			case 'i':
-				scale += SCALE_INCREMENT;
-				canvas_set_scale(canvas, scale);
-				break;
-			case 'd':
-				scale -= SCALE_INCREMENT;
-				canvas_set_scale(canvas, scale);
-				break;
-			case 'n':
-				add_new_chart();
-				break;
-			case 'D':
-				delete_chart();
-				break;
-			default:
-				//NOP
-				break;
-		};
-		bake(tart);
-		wrefresh(tarts_w);
-		wrefresh(footer_w);
-		doupdate();
-	} while ((c = wgetch(tarts_w)) != 'q');
 
 	housekeeping(canvas, tart);
 	return status;

@@ -3,7 +3,7 @@
 
 typedef struct Tart Tart;
 
-void bake(Tart *tart);
+PlotStatus bake(Tart *tart);
 Tart *new_tart(Canvas *canvas, WINDOW *w);
 void tart_set_canvas(struct Tart *t, Canvas *canvas);
 Canvas *tart_get_canvas(struct Tart *t);

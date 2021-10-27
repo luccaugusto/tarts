@@ -166,7 +166,7 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 
 	/* print labels */
 	aux = malloc(sizeof(char) * MAX_NAME_LENGTH * 2);
-	pos = (height-1) * width + labels_x_offset;
+	pos = (height-2) * width + labels_x_offset;
 	for (int i=0; i < pie->count_portions; ++i) {
 		portion = pie->portion_stack[i];
 

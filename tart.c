@@ -17,30 +17,12 @@ struct Tart {
 	WINDOW *window;
 };
 
-char *
-rotten_tarts(PlotStatus status)
-{
-	char *err_msg;
-	switch (status) {
-		case ERR_CIRCLE_TOO_BIG:
-			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
-			break;
-		case ERR_LINE_OUT:
-			err_msg = "Line chart doesn't fit on canvas with that scale, consider shrinking it";
-			break;
-		default:
-			err_msg = "Error";
-	}
-
-	return err_msg;
-}
-
-void
+PlotStatus
 bake(struct Tart *tart)
 {
-	char *err_msg;
-	(void)err_msg;
 	canvas_clear(tart->canvas);
+	PlotStatus status;
+
 
 	if (tart->chart_count == 0) {
 		mvwprintw(
@@ -49,25 +31,25 @@ bake(struct Tart *tart)
 			canvas_get_width(tart->canvas)/4,
 			"No charts to tart."
 		);
-		return;
+		return PLOT_OK;
 	}
 
 	for (int i=0; i<tart->chart_count; ++i) {
-		PlotStatus status = tart->chart_list[i].tart_function(
-				tart->chart_list[i].chart,
-				canvas_get_dimentions(tart->canvas),
-				canvas_get_canvas(tart->canvas),
-				canvas_get_colors_fg(tart->canvas)
-				);
+		status = tart->chart_list[i].tart_function(
+			tart->chart_list[i].chart,
+			canvas_get_dimentions(tart->canvas),
+			canvas_get_canvas(tart->canvas),
+			canvas_get_colors_fg(tart->canvas)
+		);
 
-		/* TODO: Make error message pop in a nice way, like the prompt_get_note from anote */
-		if (status != PLOT_OK) {
-			err_msg = rotten_tarts(status);
-			canvas_set_scale(tart->canvas, canvas_get_scale(tart->canvas) - SCALE_INCREMENT);
+		if (status != PLOT_OK)
 			break;
-		}
 	}
-	show_canvas(tart->canvas, tart->window);
+
+	if (status == PLOT_OK)
+		show_canvas(tart->canvas, tart->window);
+
+	return status;
 }
 
 struct Tart *

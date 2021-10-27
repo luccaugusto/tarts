@@ -38,6 +38,8 @@ typedef enum {
 	ERR_CIRCLE_TOO_BIG,
 	ERR_BAR_TOO_BIG,
 	ERR_LINE_OUT,
+	ERR_ARGS_COUNT_DONT_MATCH,
+	ERR_TOO_MANY_CHARTS,
 } PlotStatus;
 
 typedef enum {
