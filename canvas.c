@@ -2,16 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ncurses.h>
+#include <string.h>
 
 #include "./utils.h"
 #include "./constants.h"
+#include "./canvas.h"
 
 /* TYPE DEFINITION */
 struct Canvas{
-	struct Dimentions dimentions;
+	int show_scale;
 	char *canvas;
 	Color *colors_fg;
 	Color *colors_bg;
+	struct Dimentions dimentions;
 };
 
 /* FUNCTION PROTOTYPES */
@@ -40,6 +43,12 @@ canvas_set_height(struct Canvas *s, int height)
 	s->dimentions.height = height;
 }
 
+void
+canvas_set_show_scale(struct Canvas *s, int show_scale)
+{
+	s->show_scale = show_scale;
+}
+
 double
 canvas_get_scale(struct Canvas *s)
 {
@@ -56,6 +65,12 @@ int
 canvas_get_height(struct Canvas *s)
 {
 	return s->dimentions.height;
+}
+
+int
+canvas_get_show_scale(struct Canvas *s)
+{
+	return s->show_scale;
 }
 
 struct Dimentions *
@@ -142,19 +157,40 @@ print_canvas(struct Canvas *c)
 }
 
 void
+show_scale(struct Canvas *c)
+{
+	char *canvas = canvas_get_canvas(c);
+	Color *colors_fg = canvas_get_colors_fg(c);
+	double scale = canvas_get_scale(c);
+	int height = canvas_get_height(c);
+	int width = canvas_get_width(c);
+	char *aux = malloc(sizeof(char) * MAX_NAME_LENGTH);
+
+	for (int y=0; y<height; y+=(2 / scale)) {
+		for (int x=0; x<width; ++x) {
+			canvas[y*width + x] = SCALE_BLOCK;
+			colors_fg[y*width + x] = COLOR_WHITE;
+		}
+		aux = int2str((height- y)/scale);
+		strncpy(&canvas[y*width], aux, strlen(aux));
+	}
+}
+
+void
 show_canvas(struct Canvas *c, WINDOW *w)
 {
 	int height = canvas_get_height(c);
 	int width = canvas_get_width(c);
 	char *canvas = canvas_get_canvas(c);
 	Color *colors_fg = canvas_get_colors_fg(c);
+	Color *colors_bg = canvas_get_colors_bg(c);
 
 	for (int y=0; y<height; ++y) {
 		for (int x=0; x<width; ++x) {
-			setcolor(colors_fg[y * width + x], 0, w);
+			setcolor(colors_fg[y * width + x], colors_bg[y * width + x], w);
 			/* offset printing because of borders */
 			mvwprintw(w,y+1, x+1, "%c", canvas[y * width + x] );
-			unsetcolor(colors_fg[y * width + x], 0, w);
+			unsetcolor(colors_fg[y * width + x], colors_bg[y * width + x], w);
 		}
 	}
 }
@@ -164,9 +200,11 @@ canvas_clear(struct Canvas *s)
 {
 	char *c = s->canvas;
 	int n = canvas_get_height(s) * canvas_get_width(s) - 1;
-	int n2 = n;
+	int nfg = n;
+	int nbg = n;
 	while (n >= 0) c[n--] = BLANK;
-	while (n2 >= 0) s->colors_fg[n2--] = COLOR_BLANK;
+	while (nfg >= 0) s->colors_fg[nfg--] = COLOR_BLANK;
+	while (nbg >= 0) s->colors_fg[nbg--] = COLOR_BLANK;
 }
 
 struct Canvas *
@@ -175,9 +213,11 @@ new_canvas(int height, int width)
 	struct Canvas *s = malloc(sizeof(struct Canvas));
 	canvas_set_height(s, height);
 	canvas_set_width(s, width);
+	canvas_set_scale(s, 1);
 	s->canvas = malloc(sizeof(char) * (height) * (width));
 	s->colors_fg = malloc(sizeof(int) * (height) * (width));
 	s->colors_bg = malloc(sizeof(int) * (height) * (width));
+	s->show_scale = 0;
 
 	canvas_clear(s);
 
