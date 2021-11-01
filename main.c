@@ -15,7 +15,6 @@
 #include "./bar_chart.h"
 #include "./line_chart.h"
 #include "./tart.h"
-#include "./cli_tart.h"
 #include "./prompt.h"
 
 /* GLOBAL VARIABLES  */
@@ -113,7 +112,7 @@ init_tart(void)
     start_color();
     init_colorpairs();
 
-	prompt_win = create_new_win(max_height/3, max_width/3, max_height/4, max_width/4);
+	prompt_win = create_new_win(max_height/3, max_width/2, max_height/4, max_width/4);
 	prompt_panel = new_panel(prompt_win);
 }
 
@@ -309,8 +308,6 @@ main(int argc, char *argv[])
 	PlotStatus status = PLOT_OK;
 	/* Borders ocupy one char on left, right, top and bottom */
 	Canvas *canvas = new_canvas(tarts_height-2, tarts_width-2);
-	scale = (tarts_height-PADDING) / max_value;
-	canvas_set_scale(canvas, scale);
 
 	tarts_w = create_new_win(tarts_height, tarts_width, 0, 0);
 	footer_w = create_new_win(FOOTER_HEIGHT, max_width, tarts_height, 0);
@@ -323,6 +320,9 @@ main(int argc, char *argv[])
 		housekeeping(canvas,tart);
 		tart_error(status);
 	}
+
+	scale = (tarts_height-PADDING) / max_value;
+	canvas_set_scale(canvas, scale);
 
 	if (arguments.interactive) {
 		execution_loop(tart, tarts_w, footer_w, scale);

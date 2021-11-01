@@ -8,7 +8,6 @@
 #include "./constants.h"
 #include "./canvas.h"
 #include "./tart.h"
-#include "./cli_tart.h"
 
 /* GLOBAL VARIABLES */
 WINDOW *prompt_win;
@@ -51,7 +50,7 @@ prompt_user(Canvas *c, char *question, char *label, int align_center)
 {
 	char *answer;
 	int prompt_win_h = canvas_get_height(c) / 3;
-	int prompt_win_w = canvas_get_width(c) / 3;
+	int prompt_win_w = canvas_get_width(c) / 4;
 	WINDOW *p_win = panel_window(prompt_panel);;
 
 	wattrset(p_win, COLOR_PAIR(colornum(7,0)));
@@ -76,6 +75,34 @@ prompt_user(Canvas *c, char *question, char *label, int align_center)
 	strcpy(answer, buffer);
 
 	return answer;
+}
+
+void
+alert(Canvas *c, char *alert, char *label, int align_center)
+{
+	int prompt_win_h;
+	int prompt_win_w;
+	WINDOW *p_win = panel_window(prompt_panel);
+	getmaxyx(p_win, prompt_win_h, prompt_win_w);
+
+	wattrset(p_win, COLOR_PAIR(colornum(7,0)));
+	box(p_win, 0, 0);
+	draw_headers(p_win, prompt_win_h, prompt_win_w, label, COLOR_PAIR(colornum(7,0)));
+
+	if (align_center)
+		print_align_center(p_win, HEADER_HEIGHT, 1, prompt_win_w, alert, COLOR_PAIR(colornum(7,0)));
+	else
+		mvwprintw(p_win, HEADER_HEIGHT, 2, alert);
+
+	mvwprintw(p_win, HEADER_HEIGHT, 2, alert);
+	mvwprintw(p_win, prompt_win_h - 1, prompt_win_w/2, "[OK]");
+
+	show_panel(prompt_panel);
+
+	wgetch(p_win);
+
+	werase(p_win);
+	hide_panel(prompt_panel);
 }
 
 // void
