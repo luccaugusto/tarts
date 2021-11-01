@@ -162,6 +162,8 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 	x = PADDING/2;
 	for (int i=0; i<count_points; ++i) {
 		scaled_point = height - (points[i] * dimentions->scale);
+		if (scaled_point < 1)
+			scaled_point = 3;
 
 		if (scaled_point > (double)height - PADDING/2 || scaled_point < PADDING/2)
 			return ERR_LINE_OUT;

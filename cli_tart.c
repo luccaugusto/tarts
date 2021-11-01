@@ -1,9 +1,13 @@
 #include <ncurses.h>
+#include <string.h>
+#include <panel.h>
 
 #include "./utils.h"
 #include "./constants.h"
 #include "./canvas.h"
 #include "./tart.h"
+#include "./cli_tart.h"
+#include "./prompt.h"
 
 /* TODO */
 void delete_chart(){return;}
@@ -58,14 +62,17 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale)
 				//NOP
 				break;
 		};
-		/* TODO: Make error message pop in a nice way, like the prompt_get_note from anote */
 		if ((status = bake(tart)) != PLOT_OK) {
 			err_msg = rotten_tarts(status);
 			scale -= SCALE_INCREMENT;
 			canvas_set_scale(canvas, scale);
+			curs_set(1);
+			prompt_user(canvas, err_msg, "Error:", 1);
+			curs_set(0);
 		}
 		wrefresh(tarts_w);
 		wrefresh(footer_w);
 		doupdate();
 	} while ((c = wgetch(tarts_w)) != 'q');
 }
+

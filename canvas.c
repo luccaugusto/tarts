@@ -20,7 +20,6 @@ struct Canvas{
 /* FUNCTION PROTOTYPES */
 Color curs_color(int fg);
 int is_bold(int fg);
-int colornum(int fg, int bg);
 void unsetcolor(int fg, int bg, WINDOW *w);
 void setcolor(int fg, int bg, WINDOW *w);
 

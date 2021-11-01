@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ncurses.h>
+#include <panel.h>
 #include <errno.h>
 
 #include "./utils.h"
@@ -15,6 +16,7 @@
 #include "./line_chart.h"
 #include "./tart.h"
 #include "./cli_tart.h"
+#include "./prompt.h"
 
 /* GLOBAL VARIABLES  */
 int max_height;
@@ -110,6 +112,9 @@ init_tart(void)
 
     start_color();
     init_colorpairs();
+
+	prompt_win = create_new_win(max_height/3, max_width/3, max_height/4, max_width/4);
+	prompt_panel = new_panel(prompt_win);
 }
 
 void

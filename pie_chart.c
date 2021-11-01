@@ -81,8 +81,8 @@ circle_fits(Pie *pie, int width, int height, double scale)
  * ROW 1 [.,*,.,*]
  * ROW 2 [.,.,*,*]
  *
- * ROW C [ ,",~,O]
- * these characters can be changed by the macros
+ * ROW 3 [ ,",~,O]
+ * these characters can be changed in the macros
  * BLANK, PIEBLOCK_TOP, PIEBLOCK_BOTTOM and PIEBLOCK_FULL respectively
  *  */
 PlotStatus
