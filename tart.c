@@ -98,6 +98,7 @@ void
 destroy_tart(struct Tart *t)
 {
 	for (int i=0; i<t->chart_count; ++i) {
+		free(t->chart_list[i].chart);
 	}
 	free(t);
 }

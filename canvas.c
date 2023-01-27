@@ -105,7 +105,9 @@ canvas_get_colors_fg(struct Canvas *s)
 void
 destroy_canvas(struct Canvas *s)
 {
-	free(canvas_get_canvas(s));
+	char *canvas = canvas_get_canvas(s);
+	if (canvas != NULL)
+		free(canvas);
 	free(s);
 }
 

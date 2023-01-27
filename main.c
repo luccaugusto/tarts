@@ -41,7 +41,7 @@ const char *argp_program_bug_address = MANTAINER_EMAIL;
 static char doc[] = "Plot delicious Charts on the Terminal with T(CH)ARTS";
 static char args_doc[] = "[tarts]...";
 static struct argp_option options[] = {
-	/* arg name, flag,   arg value   ,is optional,       description         */
+	/* arg name,         flag,  arg value     ,is optional,       description         */
 	{ "type"            , 't' ,  "chart type" ,     0     , "[bar/pie/line]"                },
 	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"         },
 	{ "labels"          , 'l' , "chart labels",     0     , "Csv list of strings for labels"},
@@ -139,7 +139,9 @@ housekeeping(Canvas *s, Tart *t)
 	delwin(footer_w);
 	if (s != NULL)
 		destroy_canvas(s);
-	destroy_tart(t);
+	if (t != NULL)
+		destroy_tart(t);
+
 	show_cursor(1);
 	echo();
 	endwin();
@@ -302,6 +304,7 @@ main(int argc, char *argv[])
 	/* Begin */
 	init_tart();
 
+	int must_housekeep = 1;
 	int tarts_width = max_width;
 	int tarts_height = max_height - FOOTER_HEIGHT;
 	double max_value = tarts_height;
@@ -329,6 +332,7 @@ main(int argc, char *argv[])
 	}
 
 	else {
+		must_housekeep = 0;
 		if (tart_get_chart_count(tart) > 0) {
 			bake(tart);
 			housekeeping(NULL, tart);
@@ -340,6 +344,6 @@ main(int argc, char *argv[])
 		}
 	}
 
-	housekeeping(canvas, tart);
+	if (must_housekeep) housekeeping(canvas, tart);
 	return status;
 }
