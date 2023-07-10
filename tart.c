@@ -8,10 +8,12 @@
 #include "./canvas.h"
 #include "./tart.h"
 #include "./prompt.h"
+#include "./line_chart.h"
 
 struct ChartFunctionTuple {
 	void *chart;
 	PlotFunction tart_function;
+	ChartType type;
 };
 
 struct Tart {
@@ -81,7 +83,7 @@ tart_get_canvas(struct Tart *t)
 }
 
 int
-tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function)
+tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function, ChartType type)
 {
 	if (t->chart_count >= MAX_CHARTS)
 		return 0;
@@ -89,6 +91,7 @@ tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function)
 	struct ChartFunctionTuple cft;
 	cft.chart = chart;
 	cft.tart_function = tart_function;
+	cft.type = type;
 
 	t->chart_list[t->chart_count++] = cft;
 	return 1;
@@ -119,6 +122,48 @@ tart_set_window(struct Tart *t, WINDOW *w)
 void delete_chart(){return;}
 void add_new_chart(){return;}
 void show_commands_panel(){return;}
+
+void
+show_chart_stats(struct Tart *t)
+{
+	double avg, min, max, total;
+	char name[MAX_NAME_LENGTH];
+	char *stats;
+	char *title = "Stats for chart ";
+	char *label;
+
+	for (int i=0; i<t->chart_count; ++i) {
+		switch (t->chart_list[i].type) {
+			case LINE_CHART:; /* empty statement because language requires */
+				Line *l = (Line *)t->chart_list[i].chart;
+				double *points = line_get_points(l);
+				int count_points = line_get_count_points(l);
+				min = max = points[0];
+				for (int j=0; j<count_points; ++j) {
+					total+=points[j];
+					if (points[j] < min)
+						min = points[j];
+
+					if (points[j] > max)
+						max = points[j];
+				}
+				avg = total/count_points;
+				strncpy(name, line_get_name(l), MAX_NAME_LENGTH);
+				label = malloc(sizeof(char) * (strlen(name) + strlen(title)));
+				strncpy(label, title, strlen(title));
+				strncpy(&label[strlen(title)], name, strlen(name));
+				break;
+			case PIE_CHART:
+				break;
+			case BAR_CHART:
+				break;
+			default:
+				break;
+		}
+		alert(tart_get_canvas(t), stats, label, 1);
+		free(label);
+	}
+}
 
 char *
 rotten_tarts(PlotStatus status)
@@ -166,6 +211,9 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale)
 				break;
 			case 'D':
 				delete_chart();
+				break;
+			case 'r':
+				show_chart_stats(tart);
 				break;
 			default:
 				//NOP

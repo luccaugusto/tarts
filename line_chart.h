@@ -14,7 +14,7 @@ struct LineChart *new_line(double *points, char *name, int width, int points_len
 double *line_get_points(Line *l);
 char *line_get_name(Line *l);
 PlotStatus print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen, Color *canvas_colors);
-int line_get_points_len(Line *l);
+int line_get_count_points(Line *l);
 void line_set_color(Line *l, Color c);
 Color line_get_color(Line *l);
 

@@ -46,7 +46,7 @@ typedef enum {
 	BAR_CHART,
 	PIE_CHART,
 	LINE_CHART,
-	COUNT_CHARTS,
+	COUNT_CHART_TYPES,
 } ChartType;
 
 typedef PlotStatus (*PlotFunction)(void *, struct Dimentions *, char *, Color *);

@@ -94,7 +94,6 @@ alert(Canvas *c, char *alert, char *label, int align_center)
 	else
 		mvwprintw(p_win, HEADER_HEIGHT, 2, alert);
 
-	mvwprintw(p_win, HEADER_HEIGHT, 2, alert);
 	mvwprintw(p_win, prompt_win_h - 1, prompt_win_w/2, "[OK]");
 
 	show_panel(prompt_panel);

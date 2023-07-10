@@ -53,7 +53,7 @@ static struct argp_option options[] = {
 
 /* TYPES */
 struct Arguments {
-	enum {NONE, PIECHART, LINECHART, BARCHART} charts[MAX_CHARTS];
+	enum {NONE, ARG_PIECHART, ARG_LINECHART, ARG_BARCHART} charts[MAX_CHARTS];
 	int charts_count;
 	struct LabelList labels[MAX_CHARTS];
 	int labels_count;
@@ -150,7 +150,7 @@ housekeeping(Canvas *s, Tart *t)
 void
 show_footer_info(void)
 {
-	mvwprintw(footer_w, 1, 1, "?: Help | q: Quit Tarts | i: increase scale | d: decrease scale");
+	mvwprintw(footer_w, 1, 1, "?: Help | q: Quit Tarts | i: increase scale | d: decrease scale | r: show reports");
 }
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -160,12 +160,12 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 		case 'l': arguments->labels[arguments->labels_count++] = *parse_labels(arg);
 				  break;
 		case 't': switch (arg[0]) {
-					  case 'p': arguments->charts[arguments->charts_count++] = PIECHART;
+					  case 'p': arguments->charts[arguments->charts_count++] = ARG_PIECHART;
 								break;
-					  case 'l': arguments->charts[arguments->charts_count++] = LINECHART;
+					  case 'l': arguments->charts[arguments->charts_count++] = ARG_LINECHART;
 								break;
 					  default:
-					  case 'b': arguments->charts[arguments->charts_count++] = BARCHART;
+					  case 'b': arguments->charts[arguments->charts_count++] = ARG_BARCHART;
 								break;
 				  }
 				  break;
@@ -217,7 +217,7 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 		/* just cicle on list to allow more than 7 portions */
 		color_used = (color_used + 1) % count_color;
 	}
-	tart_add_chart(tart, p, print_pie);
+	tart_add_chart(tart, p, print_pie, PIE_CHART);
 	return PLOT_OK;
 }
 
@@ -238,7 +238,7 @@ create_line_from_args(struct Arguments *arguments, double *max_value, int tarts_
 	line_set_color(l, color_list[color_used]);
 	/* just cicle on list to allow more than 7 charts */
 	color_used = (color_used + 1) % count_color;
-	tart_add_chart(tart, l, print_line_chart);
+	tart_add_chart(tart, l, print_line_chart, LINE_CHART);
 	return PLOT_OK;
 }
 
@@ -258,7 +258,7 @@ create_bar_from_args(struct Arguments *arguments, double *max_value, int tarts_h
 	bar_set_color(b, color_list[color_used]);
 	/* just cicle on list to allow more than 7 charts */
 	color_used = (color_used + 1) % count_color;
-	tart_add_chart(tart, b, print_bar_chart);
+	tart_add_chart(tart, b, print_bar_chart, BAR_CHART);
 	return PLOT_OK;
 }
 
@@ -272,13 +272,13 @@ prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts
 
 	for (int i=0; i<arguments->charts_count; ++i) {
 		switch (arguments->charts[i]) {
-			case PIECHART:
+			case ARG_PIECHART:
 				ret_code = create_pie_from_args(arguments, tart, i);
 				break;
-			case LINECHART:
+			case ARG_LINECHART:
 				ret_code = create_line_from_args(arguments, max_value, tarts_height, tart, i);
 				break;
-			case BARCHART:
+			case ARG_BARCHART:
 				ret_code = create_bar_from_args(arguments, max_value, tarts_height, tart, i);
 				break;
 			default:

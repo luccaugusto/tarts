@@ -18,7 +18,7 @@ int tart_get_chart_count(struct Tart *t);
 Tart *new_tart(Canvas *canvas, WINDOW *w);
 void tart_set_window(struct Tart *t, WINDOW *w);
 void tart_set_canvas(struct Tart *t, Canvas *canvas);
-int tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function);
+int tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function, ChartType type);
 void execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale);
 
 #endif

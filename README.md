@@ -2,6 +2,7 @@
 
 ![tarts logo](img/tarts_logo.png)
 
+
 Plot charts on the terminal with ascii text.
 
 ## About:
