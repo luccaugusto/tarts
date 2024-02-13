@@ -13,15 +13,15 @@
 #define VERSION             "Tarts 1.0"
 #define MANTAINER_EMAIL     "lucca@luccaaugusto.xyz"
 
-#define CODE_BLACK       "\e[0;30m"
-#define CODE_RED         "\e[0;31m"
-#define CODE_GREEN       "\e[0;32m"
-#define CODE_YELLOW      "\e[0;33m"
-#define CODE_BLUE        "\e[0;34m"
-#define CODE_MAGENTA     "\e[0;35m"
-#define CODE_CYAN        "\e[0;36m"
-#define CODE_WHITE       "\e[0;37m"
-#define CODE_COLOR_RESET "\e[0m"
+#define CODE_BLACK       "\033[0;30m"
+#define CODE_RED         "\033[0;31m"
+#define CODE_GREEN       "\033[0;32m"
+#define CODE_YELLOW      "\033[0;33m"
+#define CODE_BLUE        "\033[0;34m"
+#define CODE_MAGENTA     "\033[0;35m"
+#define CODE_CYAN        "\033[0;36m"
+#define CODE_WHITE       "\033[0;37m"
+#define CODE_COLOR_RESET "\033[0m"
 
 typedef short Color;
 
