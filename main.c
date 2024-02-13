@@ -16,6 +16,7 @@
 #include "./line_chart.h"
 #include "./tart.h"
 #include "./prompt.h"
+#include "./colors.h"
 
 /* GLOBAL VARIABLES  */
 int max_height;
@@ -24,17 +25,6 @@ double scale = 1;
 char *err_msg = "\0";
 WINDOW *tarts_w;
 WINDOW *footer_w;
-short color_list[] = {
-	COLOR_BLUE,
-	COLOR_GREEN,
-	COLOR_CYAN,
-	COLOR_RED,
-	COLOR_MAGENTA,
-	COLOR_YELLOW,
-	COLOR_WHITE,
-};
-int count_color = 7;
-int color_used = 0;
 
 const char *argp_program_version = VERSION;
 const char *argp_program_bug_address = MANTAINER_EMAIL;
@@ -71,15 +61,6 @@ show_cursor(int show)
 		curs_set(1);
 	else
 		curs_set(0);
-}
-
-short
-get_color()
-{
-	short current_color = color_list[color_used];
-	/* just cicle on list to allow more than 7 portions */
-	color_used = (color_used + 1) % count_color;
-	return current_color;
 }
 
 WINDOW *
