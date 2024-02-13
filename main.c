@@ -73,6 +73,15 @@ show_cursor(int show)
 		curs_set(0);
 }
 
+short
+get_color()
+{
+	short current_color = color_list[color_used];
+	/* just cicle on list to allow more than 7 portions */
+	color_used = (color_used + 1) % count_color;
+	return current_color;
+}
+
 WINDOW *
 create_new_win(int height, int width, int start_y, int start_x)
 {
@@ -153,9 +162,10 @@ show_footer_info(void)
 	mvwprintw(footer_w, 1, 1, "?: Help | q: Quit Tarts | i: increase scale | d: decrease scale | r: show reports");
 }
 
-static error_t parse_opt(int key, char *arg, struct argp_state *state) {
+static error_t
+parse_opt(int key, char *arg, struct argp_state *state) {
     struct Arguments *arguments = state->input;
-	int r;
+	int radius;
     switch (key) {
 		case 'l': arguments->labels[arguments->labels_count++] = *parse_labels(arg);
 				  break;
@@ -171,8 +181,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 				  break;
 		case 'v': arguments->values[arguments->values_count++] = *parse_values(arg);
 				  break;
-		case 'r': r = (int)str2double(arg);
-				  arguments->radius = r > MAX_RADIUS ? MAX_RADIUS : r;
+		case 'r': radius = (int)str2double(arg);
+				  arguments->radius = radius > MAX_RADIUS ? MAX_RADIUS : radius;
 				  break;
 		case 'n': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
@@ -194,8 +204,8 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 		return ERR_ARGS_COUNT_DONT_MATCH;
 
 	Pie *p = new_pie(
-			canvas_get_height(tart_get_canvas(tart))/2,
-			canvas_get_width(tart_get_canvas(tart))/4,
+			canvas_get_height(tart_get_canvas(tart))/2.0,
+			canvas_get_width(tart_get_canvas(tart))/4.0,
 			arguments->radius
 			);
 	/* calculate each value's percentage */
@@ -211,54 +221,50 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 				percentage[j],
 				arguments->values[index].values[j],
 				arguments->labels[index].labels[j],
-				color_list[color_used]
+				get_color()
 			)
 		);
-		/* just cicle on list to allow more than 7 portions */
-		color_used = (color_used + 1) % count_color;
 	}
 	tart_add_chart(tart, p, print_pie, PIE_CHART);
 	return PLOT_OK;
 }
 
 PlotStatus
-create_line_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
+create_line_from_args(struct Arguments *arguments, int tarts_height, Tart *tart, int index)
 {
-	/* get max value for scale */
-	for (int j=0; j<arguments->values[index].count_values; ++j) {
-		if (arguments->values[index].values[j] > *max_value)
-			*max_value = arguments->values[index].values[j];
-	}
 	Line *l = new_line(
 			arguments->values[index].values,
 			arguments->labels[index].labels[0],
 			canvas_get_width(tart_get_canvas(tart)),
 			arguments->values[index].count_values
 			);
-	line_set_color(l, color_list[color_used]);
-	/* just cicle on list to allow more than 7 charts */
-	color_used = (color_used + 1) % count_color;
+	line_set_color(l, get_color());
 	tart_add_chart(tart, l, print_line_chart, LINE_CHART);
 	return PLOT_OK;
 }
 
 PlotStatus
-create_bar_from_args(struct Arguments *arguments, double *max_value, int tarts_height, Tart *tart, int index)
+create_bar_from_args(char* label, int value, int tarts_height, Tart *tart)
 {
-	/* get max value for scale */
-	for (int j=0; j<arguments->values[index].count_values; ++j) {
-		if (arguments->values[index].values[j] > *max_value)
-			*max_value = arguments->values[index].values[j];
-	}
 	Bar *b = new_bar(
-			arguments->values[index].values[0],
-			arguments->labels[index].labels[0]
-			);
+		value,
+		label
+	);
 
-	bar_set_color(b, color_list[color_used]);
-	/* just cicle on list to allow more than 7 charts */
-	color_used = (color_used + 1) % count_color;
+	bar_set_color(b, get_color());
 	tart_add_chart(tart, b, print_bar_chart, BAR_CHART);
+	return PLOT_OK;
+}
+
+PlotStatus
+create_one_or_more_bar_from_args(struct Arguments *arguments, int tarts_height, Tart *tart, int index)
+{
+	if (arguments->values[index].count_values != arguments->labels[index].count_labels)
+		return ERR_ARGS_COUNT_DONT_MATCH;
+
+	for (int j=0; j<arguments->values[index].count_values; ++j) {
+		create_bar_from_args(arguments->labels[index].labels[j], arguments->values[index].values[j], tarts_height, tart);
+	}
 	return PLOT_OK;
 }
 
@@ -271,15 +277,20 @@ prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts
 		return ERR_TOO_MANY_CHARTS;
 
 	for (int i=0; i<arguments->charts_count; ++i) {
+		/* get max value for scale */
+		for (int j=0; j<arguments->values[i].count_values; ++j) {
+			if (arguments->values[i].values[j] > *max_value)
+				*max_value = arguments->values[i].values[j];
+		}
 		switch (arguments->charts[i]) {
 			case ARG_PIECHART:
 				ret_code = create_pie_from_args(arguments, tart, i);
 				break;
 			case ARG_LINECHART:
-				ret_code = create_line_from_args(arguments, max_value, tarts_height, tart, i);
+				ret_code = create_line_from_args(arguments, tarts_height, tart, i);
 				break;
 			case ARG_BARCHART:
-				ret_code = create_bar_from_args(arguments, max_value, tarts_height, tart, i);
+				ret_code = create_one_or_more_bar_from_args(arguments, tarts_height, tart, i);
 				break;
 			default:
 			case NONE:
