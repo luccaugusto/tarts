@@ -128,9 +128,9 @@ show_chart_stats(struct Tart *t)
 {
 	double avg, min, max, total;
 	char name[MAX_NAME_LENGTH];
-	char *stats;
+	char *stats = NULL;
 	char *title = "Stats for chart ";
-	char *label;
+	char *label = NULL;
 
 	for (int i=0; i<t->chart_count; ++i) {
 		switch (t->chart_list[i].type) {
