@@ -5,7 +5,9 @@
 #define PADDING             4
 #define BLANK               ' '
 #define MAX_NAME_LENGTH     50
-#define SCALE_INCREMENT     (scale * 0.1)
+#define SCALE_STEP          0.1
+#define ZOOM_IN  		    1
+#define ZOOM_OUT 		    0
 #define PI                  3.14159265
 #define RADIANS_TO_DEG(x)   (x * 180.0/PI)
 #define MAX_CHARTS          10

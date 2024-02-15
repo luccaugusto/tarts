@@ -320,7 +320,7 @@ main(int argc, char *argv[])
 	canvas_set_scale(canvas, scale);
 
 	if (arguments.interactive) {
-		execution_loop(tart, tarts_w, footer_w, scale);
+		execution_loop(tart, tarts_w, footer_w);
 	}
 
 	else {

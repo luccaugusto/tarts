@@ -25,8 +25,23 @@ void setcolor(int fg, int bg, WINDOW *w);
 
 /* FUNCTION DEFINITION */
 void
+canvas_zoom(struct Canvas *s, int in_or_out)
+{
+	double scale = canvas_get_scale(s);
+	switch (in_or_out) {
+		case ZOOM_IN:
+			canvas_set_scale(s, scale + scale * SCALE_STEP);
+			break;
+		case ZOOM_OUT:
+			canvas_set_scale(s, scale - scale * SCALE_STEP);
+			break;
+	}
+}
+
+void
 canvas_set_scale(struct Canvas *s, double scale)
 {
+	if (scale < 0.1) scale = 0.1;
 	s->dimentions.scale = scale;
 }
 

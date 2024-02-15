@@ -187,7 +187,7 @@ rotten_tarts(PlotStatus status)
 }
 
 void
-execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale)
+execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w)
 {
 	int c = BLANK;
 	char *err_msg;
@@ -199,12 +199,10 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale)
 				show_commands_panel();
 				break;
 			case 'i':
-				scale += SCALE_INCREMENT;
-				canvas_set_scale(canvas, scale);
+				canvas_zoom(canvas, ZOOM_IN);
 				break;
 			case 'd':
-				scale -= SCALE_INCREMENT;
-				canvas_set_scale(canvas, scale);
+				canvas_zoom(canvas, ZOOM_OUT);
 				break;
 			case 'n':
 				add_new_chart();
@@ -221,8 +219,7 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w, double scale)
 		};
 		if ((status = bake(tart)) != PLOT_OK) {
 			err_msg = rotten_tarts(status);
-			scale -= SCALE_INCREMENT;
-			canvas_set_scale(canvas, scale);
+			canvas_zoom(canvas, ZOOM_OUT);
 			alert(canvas, err_msg, "Error:", 1);
 			box(tarts_w,0,0);
 			box(footer_w,0,0);

@@ -9,6 +9,7 @@ typedef struct Canvas Canvas;
 void canvas_set_width(struct Canvas *c, int width);
 void canvas_set_height(struct Canvas *c, int height);
 void canvas_set_scale(struct Canvas *s, double scale);
+void canvas_zoom(struct Canvas *s, int in_or_out);
 void canvas_set_show_scale(struct Canvas *s, int show_scale);
 int canvas_get_width(struct Canvas *c);
 int canvas_get_height(struct Canvas *c);
