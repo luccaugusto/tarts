@@ -165,7 +165,7 @@ print_line_chart(void *line, struct Dimentions *dimentions, char *canvas_screen,
 		if (scaled_point < 1)
 			scaled_point = 3;
 
-		if (scaled_point > (double)height - PADDING/2 || scaled_point < PADDING/2)
+		if (scaled_point > (double)height - PADDING/2.0 || scaled_point < PADDING/2.0)
 			return ERR_LINE_OUT;
 
 		/* draw line from first point */

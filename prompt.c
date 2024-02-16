@@ -46,7 +46,7 @@ draw_headers(WINDOW *window, int height, int width, char *label, chtype color)
 }
 
 char *
-prompt_user(Canvas *c, char *question, char *label, int align_center)
+prompt_user(Canvas *c, char *question, char *label)
 {
 	char *answer;
 	int prompt_win_h = canvas_get_height(c) / 3;
@@ -57,10 +57,7 @@ prompt_user(Canvas *c, char *question, char *label, int align_center)
 	box(p_win, 0, 0);
 	draw_headers(p_win, prompt_win_h, prompt_win_w, label, COLOR_PAIR(colornum(7,0)));
 
-	if (align_center)
-		print_align_center(p_win, HEADER_HEIGHT, 1, prompt_win_w, question, COLOR_PAIR(colornum(7,0)));
-	else
-		mvwprintw(p_win, HEADER_HEIGHT, 1, question);
+	mvwprintw(p_win, HEADER_HEIGHT, 0, "%s", question);
 
 	show_panel(prompt_panel);
 
@@ -86,16 +83,13 @@ alert(Canvas *c, char *alert, char *label, int align_center)
 	getmaxyx(p_win, prompt_win_h, prompt_win_w);
 
 	wattrset(p_win, COLOR_PAIR(colornum(7,0)));
-	box(p_win, 0, 0);
 	draw_headers(p_win, prompt_win_h, prompt_win_w, label, COLOR_PAIR(colornum(7,0)));
 
-	if (align_center)
-		print_align_center(p_win, HEADER_HEIGHT, 1, prompt_win_w, alert, COLOR_PAIR(colornum(7,0)));
-	else
-		mvwprintw(p_win, HEADER_HEIGHT, 2, alert);
+	mvwprintw(p_win, HEADER_HEIGHT, 1, "%s\n", alert);
 
 	mvwprintw(p_win, prompt_win_h - 1, prompt_win_w/2, "[OK]");
 
+	box(p_win, 0, 0);
 	show_panel(prompt_panel);
 
 	wgetch(p_win);

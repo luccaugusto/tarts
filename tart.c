@@ -171,19 +171,22 @@ rotten_tarts(PlotStatus status)
 	char *err_msg;
 	switch (status) {
 		case ERR_CIRCLE_TOO_BIG:
-			err_msg = "Pie chart doesn't fit on canvas with that scale, consider shrinking it";
+			err_msg = "Pie chart doesn't fit on canvas with that scale";
 			break;
 		case ERR_LINE_OUT:
-			err_msg = "Line chart doesn't fit on canvas with that scale, consider shrinking it";
+			err_msg = "Line chart doesn't fit on canvas with that scale";
 			break;
 		case ERR_BAR_TOO_BIG:
-			err_msg = "Bar chart doesn't fit on canvas with that scale, consider shrinking it";
+			err_msg = "Bar chart doesn't fit on canvas with that scale";
 			break;
 		default:
 			err_msg = "Error";
 	}
 
-	return err_msg;
+	char *err_msg_copy = malloc(sizeof(char) * (strlen(err_msg) + 1));
+	strncpy(err_msg_copy, err_msg, strlen(err_msg));
+
+	return err_msg_copy;
 }
 
 void
@@ -219,8 +222,9 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w)
 		};
 		if ((status = bake(tart)) != PLOT_OK) {
 			err_msg = rotten_tarts(status);
-			canvas_zoom(canvas, ZOOM_OUT);
-			alert(canvas, err_msg, "Error:", 1);
+			canvas_zoom(canvas, canvas_get_scale(canvas) < 1 ? ZOOM_IN : ZOOM_OUT);
+			alert(canvas, err_msg, "Error:", TRUE);
+			free(err_msg);
 			box(tarts_w,0,0);
 			box(footer_w,0,0);
 		}
