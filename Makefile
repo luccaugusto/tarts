@@ -79,7 +79,13 @@ clean:
 run: ${PROJ_NAME}
 	./${PROJ_NAME}
 
-test: ${PROJ_NAME}
-	./${PROJ_NAME} -t bar -l "bar1,bar2,bar3" -v "10,15,20" -t line -l "line1,line2,line3" -v "5,10,15"
+tbar: ${PROJ_NAME}
+	./${PROJ_NAME} -t bar -l "bar1,bar2,bar3" -v "10,15,20"
+
+tline: ${PROJ_NAME}
+	./${PROJ_NAME} -t line -l "line1,line2,line3" -v "5,10,15"
+
+tpie: ${PROJ_NAME}
+	./${PROJ_NAME} -t pie -l "mozzarela,pepperoni,margherita" -v "33,33,34"
 
 .PHONY: clean options all
