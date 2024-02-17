@@ -185,10 +185,10 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 		return ERR_ARGS_COUNT_DONT_MATCH;
 
 	Pie *p = new_pie(
-			canvas_get_height(tart_get_canvas(tart))/2.0,
-			canvas_get_width(tart_get_canvas(tart))/4.0,
-			arguments->radius
-			);
+		canvas_get_height(tart_get_canvas(tart))/2.0,
+		canvas_get_width(tart_get_canvas(tart))/4.0,
+		arguments->radius
+	);
 	/* calculate each value's percentage */
 	for (int j=0; j<arguments->values[index].count_values; ++j)
 		total += arguments->values[index].values[j];

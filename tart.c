@@ -29,8 +29,8 @@ bake(struct Tart *tart)
 	canvas_clear(tart->canvas);
 	PlotStatus status;
 
-	if (canvas_get_show_scale(tart->canvas))
-		show_scale(tart->canvas);
+	/* if (canvas_get_show_scale(tart->canvas))
+		show_scale(tart->canvas); */
 
 	if (tart->chart_count == 0) {
 		mvwprintw(

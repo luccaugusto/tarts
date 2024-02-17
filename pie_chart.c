@@ -25,45 +25,48 @@ struct PieChart {
 };
 
 int
-circle_fits(Pie *pie, int width, int height, double scale)
+circle_fits(Pie *pie, int width, int height)
 {
 	double center_x = get_center_x(pie);
 	double center_y = get_center_y(pie);
-	double scaled_radius = get_radius(pie) * scale;
-	double scaled_radius_h = scaled_radius/2 + 0.5;
+	double radius = get_radius(pie);
+	double radius_h = radius/2;
 
-	if (center_x + scaled_radius > width) {
-		center_x = (center_x + scaled_radius - width);
+	if (2 * radius >= width || 2 * radius_h >= height)
+		return ERR_CIRCLE_TOO_BIG;
 
-		if (center_x - scaled_radius < 0)
+	if (center_x + radius >= width) {
+		center_x = (center_x + radius - width);
+
+		if (center_x - radius <= 0)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_x(pie, center_x);
 	}
 
-	if (center_x - scaled_radius < 0) {
-		center_x = center_x + -(center_x - scaled_radius);
+	if (center_x - radius <= 0) {
+		center_x = center_x + -(center_x - radius);
 
-		if (center_x + scaled_radius > width)
+		if (center_x + radius >= width)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_x(pie, center_x);
 	}
 
-	/* y gets compressed so we can test with scaled_radius/2 */
-	if (center_y + scaled_radius_h > height) {
-		center_y = (center_y + scaled_radius - height);
+	/* y gets compressed so we can test with radius/2 */
+	if (center_y + radius_h >= height) {
+		center_y = (center_y + radius_h - height);
 
-		if (center_y - scaled_radius_h < 0)
+		if (center_y - radius_h <= 0)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_y(pie, center_y);
 	}
 
-	if (center_y - scaled_radius_h < 0) {
-		center_y = -(center_y - scaled_radius);
+	if (center_y - radius_h <= 0) {
+		center_y = center_y - (center_y - radius_h);
 
-		if (center_y + scaled_radius_h + 1 > height)
+		if (center_y + radius_h + 1 >= height)
 			return ERR_CIRCLE_TOO_BIG;
 
 		set_center_y(pie, center_y);
@@ -92,9 +95,8 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 	int c, top, bottom, ret_code, length;
 	int height = dimentions->height;
 	int width = dimentions->width;
-	double scale = dimentions->scale;
 	/* check for screen boundaries */
-	if ((ret_code = circle_fits(pie, width, height, scale)) != PLOT_OK)
+	if ((ret_code = circle_fits(pie, width, height)) != PLOT_OK)
 		return ret_code;
 
 	// bottom and top are indices b  t
@@ -107,12 +109,12 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 	double angle, radians, dx, dy, divisor;
 	double center_x = get_center_x(pie);
 	double center_y = get_center_y(pie);
-	double scaled_radius = get_radius(pie) * scale;
-	double left_x = center_x - scaled_radius;
-	double right_x = center_x + scaled_radius;
-	double top_y = center_y - scaled_radius;
-	double bottom_y = center_y + scaled_radius;
-	double radius_sqr = scaled_radius*scaled_radius;
+	double radius = get_radius(pie);
+	double left_x = center_x - radius;
+	double right_x = center_x + radius;
+	double top_y = center_y - radius;
+	double bottom_y = center_y + radius;
+	double radius_sqr = radius*radius;
 	int labels_x_offset = PADDING / 2;
 	int circle_x, circle_y, pos;
 	struct Portion portion;
@@ -147,7 +149,7 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 			/* Color portions */
 			circle_x = x - center_x;
 			circle_y = y - center_y;
-			if (circle_x*circle_x + circle_y*circle_y < scaled_radius*scaled_radius) {
+			if (circle_x*circle_x + circle_y*circle_y < radius*radius) {
 				/* avoid NaNs */
 				if ((divisor = circle_x + sqrt(circle_x*circle_x + circle_y*circle_y)) != 0) {
 					radians = 2 * atan(circle_y/divisor);
@@ -156,7 +158,7 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 				} else {
 					/* on the left side, when y = 0, use color from lines above
 					 * to avoid angle 0 because of divisor being 0 */
-					angle = (circle_x < 0) ? 170 : 0;
+					angle = (circle_x <= 0) ? 170 : 0;
 				}
 
 				canvas_colors[pos] = pie->color_by_angle_map[(int)angle];
