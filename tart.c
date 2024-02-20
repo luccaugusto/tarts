@@ -128,7 +128,7 @@ show_chart_stats(struct Tart *t)
 {
 	double avg, min, max, total;
 	char name[MAX_NAME_LENGTH];
-	char *stats = NULL;
+	char stats[MAX_NAME_LENGTH];
 	char *title = "Stats for chart ";
 	char *label = NULL;
 
@@ -160,7 +160,8 @@ show_chart_stats(struct Tart *t)
 			default:
 				break;
 		}
-		alert(tart_get_canvas(t), stats, label, 1);
+		snprintf(stats, MAX_NAME_LENGTH, "AVG: %.2f, TOTAL: %.2f, MIN: %.2f, MAX: %2.f", avg, total, min, max);
+		alert(tart_get_canvas(t), stats, label, TRUE);
 		free(label);
 	}
 }
@@ -225,9 +226,9 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w)
 			canvas_zoom(canvas, canvas_get_scale(canvas) < 1 ? ZOOM_IN : ZOOM_OUT);
 			alert(canvas, err_msg, "Error:", TRUE);
 			free(err_msg);
-			box(tarts_w,0,0);
-			box(footer_w,0,0);
 		}
+		box(tarts_w,0,0);
+		box(footer_w,0,0);
 		wrefresh(tarts_w);
 		wrefresh(footer_w);
 		doupdate();

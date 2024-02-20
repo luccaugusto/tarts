@@ -4,7 +4,7 @@
 #define FRAMED              0
 #define PADDING             4
 #define BLANK               ' '
-#define MAX_NAME_LENGTH     50
+#define MAX_NAME_LENGTH     64
 #define SCALE_STEP          0.1
 #define ZOOM_IN  		    1
 #define ZOOM_OUT 		    0
