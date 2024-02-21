@@ -24,7 +24,9 @@ void set_center_x(Pie *p, double center_x);
 void set_center_y(Pie *p, double center_y);
 double get_radius(Pie *p);
 void pie_push_portion(Pie *pie, Portion *portion);
-void pie_pop_portion(Pie *pie);
-void pie_show_stack(Pie *pie);
+void pie_pop_portion(Pie *p);
+Portion *get_portion_by_index(Pie *p, int index);
+int get_portion_count(Pie *p);
+int portion_get_value(Portion *p);
 
 #endif

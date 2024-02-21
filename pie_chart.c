@@ -282,3 +282,23 @@ get_radius(Pie *p)
 {
 	return p->radius;
 }
+
+Portion *
+get_portion_by_index(Pie *p, int index)
+{
+	if (index < 0 || index >= p->count_portions)
+		return NULL;
+	return &p->portion_stack[index];
+}
+
+int
+get_portion_count(Pie *p)
+{
+	return p->count_portions;
+}
+
+int
+portion_get_value(Portion *p)
+{
+	return p->value;
+}

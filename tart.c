@@ -9,6 +9,7 @@
 #include "./tart.h"
 #include "./prompt.h"
 #include "./line_chart.h"
+#include "pie_chart.h"
 
 struct ChartFunctionTuple {
 	void *chart;
@@ -126,7 +127,7 @@ void show_commands_panel(){return;}
 void
 show_chart_stats(struct Tart *t)
 {
-	double avg, min, max, total;
+	double avg = 0, min = 0, max = 0, total = 0;
 	char name[MAX_NAME_LENGTH];
 	char stats[MAX_NAME_LENGTH];
 	char *title = "Stats for chart ";
@@ -138,6 +139,7 @@ show_chart_stats(struct Tart *t)
 				Line *l = (Line *)t->chart_list[i].chart;
 				double *points = line_get_points(l);
 				int count_points = line_get_count_points(l);
+				total = 0;
 				min = max = points[0];
 				for (int j=0; j<count_points; ++j) {
 					total+=points[j];
@@ -149,11 +151,31 @@ show_chart_stats(struct Tart *t)
 				}
 				avg = total/count_points;
 				strncpy(name, line_get_name(l), MAX_NAME_LENGTH);
-				label = malloc(sizeof(char) * (strlen(name) + strlen(title)));
-				strncpy(label, title, strlen(title));
+				label = malloc(sizeof(char) * (strlen(name) + strlen(title)+1));
+				strncpy(label, title, strlen(title)+1);
 				strncpy(&label[strlen(title)], name, strlen(name));
 				break;
-			case PIE_CHART:
+			case PIE_CHART:;
+				Pie *p = (Pie *)t->chart_list[i].chart;
+				int count_portions = get_portion_count(p);
+				Portion *portion = get_portion_by_index(p, 0);
+				if (portion == NULL) {
+					alert(tart_get_canvas(t), "No portions in pie chart", "Error:", TRUE);
+					return;
+				}
+				total = 0;
+				min = max = portion_get_value(portion);
+				for (int j=0; j<count_portions; ++j) {
+					portion = get_portion_by_index(p, j);
+					double value = portion_get_value(portion);
+					total += value;
+					if (value < min) min = value;
+					if (value > max) max = value;
+				}
+				avg = total/count_portions;
+				label = malloc(sizeof(char) * (strlen("Pie #1") + strlen(title)));
+				strncpy(label, title, strlen(title)+1);
+				strncpy(&label[strlen(title)], name, strlen(name)+1);
 				break;
 			case BAR_CHART:
 				break;
