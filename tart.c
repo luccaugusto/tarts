@@ -25,6 +25,28 @@ struct Tart {
 	WINDOW *window;
 };
 
+struct Stats {
+	double avg;
+	double min;
+	double max;
+	double total;
+	char *min_label;
+	char *max_label;
+};
+
+Stats *
+new_stats()
+{
+	Stats *s = malloc(sizeof(Stats));
+	s->avg = 0;
+	s->min = 0;
+	s->max = 0;
+	s->total = 0;
+	s->min_label = malloc(sizeof(char) * MAX_NAME_LENGTH);
+	s->max_label = malloc(sizeof(char) * MAX_NAME_LENGTH);
+	return s;
+}
+
 PlotStatus
 bake(struct Tart *tart)
 {
@@ -126,66 +148,38 @@ void add_new_chart(){return;}
 void show_commands_panel(){return;}
 
 void
-show_chart_stats(struct Tart *t)
+show_tarts_stats(struct Tart *t)
 {
-	double avg = 0, min = 0, max = 0, total = 0;
-	char name[MAX_NAME_LENGTH];
-	char stats[MAX_NAME_LENGTH];
-	char *title = "Stats for chart ";
-	char *label = NULL;
+	char stats_string[MAX_NAME_LENGTH];
+	Stats *stats = new_stats();
 
 	for (int i=0; i<t->chart_count; ++i) {
 		switch (t->chart_list[i].type) {
-			case LINE_CHART:; /* empty statement because language requires */
+			case LINE_CHART:;
 				Line *l = (Line *)t->chart_list[i].chart;
-				double *points = line_get_points(l);
-				int count_points = line_get_count_points(l);
-				total = 0;
-				min = max = points[0];
-				for (int j=0; j<count_points; ++j) {
-					total+=points[j];
-					if (points[j] < min)
-						min = points[j];
-
-					if (points[j] > max)
-						max = points[j];
-				}
-				avg = total/count_points;
-				strncpy(name, line_get_name(l), MAX_NAME_LENGTH);
-				label = malloc(sizeof(char) * (strlen(name) + strlen(title)+1));
-				strncpy(label, title, strlen(title)+1);
-				strncpy(&label[strlen(title)], name, strlen(name));
+				line_get_stats(l, &stats->avg, &stats->min, &stats->max, &stats->total);
 				break;
 			case PIE_CHART:;
 				Pie *p = (Pie *)t->chart_list[i].chart;
-				int count_portions = get_portion_count(p);
-				Portion *portion = get_portion_by_index(p, 0);
-				if (portion == NULL) {
-					alert(tart_get_canvas(t), "No portions in pie chart", "Error:", TRUE);
-					return;
-				}
-				total = 0;
-				min = max = portion_get_value(portion);
-				for (int j=0; j<count_portions; ++j) {
-					portion = get_portion_by_index(p, j);
-					double value = portion_get_value(portion);
-					total += value;
-					if (value < min) min = value;
-					if (value > max) max = value;
-				}
-				avg = total/count_portions;
-				label = malloc(sizeof(char) * (strlen("Pie #1") + strlen(title)));
-				strncpy(label, title, strlen(title)+1);
-				strncpy(&label[strlen(title)], name, strlen(name)+1);
+				pie_get_stats(p, &stats->avg, &stats->min, &stats->max, &stats->total, stats->min_label, stats->max_label);
 				break;
 			case BAR_CHART:
 				break;
 			default:
 				break;
 		}
-		snprintf(stats, MAX_NAME_LENGTH, "AVG: %.2f, TOTAL: %.2f, MIN: %.2f, MAX: %2.f", avg, total, min, max);
-		alert(tart_get_canvas(t), stats, label, TRUE);
-		free(label);
+		snprintf(
+			stats_string,
+			MAX_NAME_LENGTH,
+			"AVG: %.2f, TOTAL: %.2f, MIN(%s): %.2f, MAX(%s): %2.f",
+			stats->avg,
+			stats->total,
+			stats->min_label,
+			stats->min,
+			stats->max_label,
+			stats->max
+		);
+		alert(tart_get_canvas(t), stats_string, "Your Tart Stats", TRUE);
 	}
 }
 
@@ -238,7 +232,7 @@ execution_loop(Tart *tart, WINDOW *tarts_w, WINDOW *footer_w)
 				delete_chart();
 				break;
 			case 'r':
-				show_chart_stats(tart);
+				show_tarts_stats(tart);
 				break;
 			default:
 				//NOP

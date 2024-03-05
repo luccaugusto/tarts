@@ -1,7 +1,6 @@
 #ifndef PLOT_H
 #define PLOT_H
 
-
 #define HEADER_HEIGHT 3
 
 #define CLEAR_WINDOW(x)                                      \
@@ -9,6 +8,7 @@
 wclrtobot(x);
 
 typedef struct Tart Tart;
+typedef struct Stats Stats;
 
 void show_commands_panel();
 PlotStatus bake(Tart *tart);

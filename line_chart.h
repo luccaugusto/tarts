@@ -17,5 +17,6 @@ PlotStatus print_line_chart(void *line, struct Dimentions *dimentions, char *can
 int line_get_count_points(Line *l);
 void line_set_color(Line *l, Color c);
 Color line_get_color(Line *l);
+int line_get_stats(Line *l, double *min, double *max, double *avg, double *total);
 
 #endif

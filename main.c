@@ -141,6 +141,12 @@ show_footer_info(void)
 	mvwprintw(footer_w, 1, 1, "?: Help | q: Quit Tarts | i: increase scale | d: decrease scale | r: show reports");
 }
 
+void
+generate_default_labels(struct Arguments *arguments)
+{
+	return;
+}
+
 static error_t
 parse_opt(int key, char *arg, struct argp_state *state) {
     struct Arguments *arguments = state->input;
@@ -298,6 +304,10 @@ main(int argc, char *argv[])
 	memset(arguments.chart_colors, BLANK_COLOR, sizeof(arguments.chart_colors));
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+	if (arguments.labels_count == 0) {
+		generate_default_labels(&arguments);
+	}
 
 	/* Begin */
 	init_tart();

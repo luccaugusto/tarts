@@ -42,6 +42,24 @@ line_set_color(Line *l, Color c)
 	l->color = c;
 }
 
+int line_get_stats(Line *l, double *avg, double *min, double *max, double *total)
+{
+	double *points = line_get_points(l);
+	int count_points = line_get_count_points(l);
+	*total = 0;
+	*min = *max = points[0];
+	for (int j=0; j<count_points; ++j) {
+		*total+=points[j];
+		if (points[j] < *min)
+			*min = points[j];
+
+		if (points[j] > *max)
+			*max = points[j];
+	}
+	*avg = *total/count_points;
+	return 1;
+}
+
 /*
  * Draws a line using Bresenham's algorithm
  */

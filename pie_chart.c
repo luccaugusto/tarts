@@ -302,3 +302,24 @@ portion_get_value(Portion *p)
 {
 	return p->value;
 }
+
+int pie_get_stats(Pie *p, double *avg, double *min, double *max, double *total, char *min_label, char *max_label)
+{
+	*total = 0;
+	*min = *max = p->portion_stack[0].value;
+	strncpy(min_label, p->portion_stack[0].name, MAX_NAME_LENGTH);
+	for (int j=0; j<p->count_portions; ++j) {
+		*total+=p->portion_stack[j].value;
+		if (p->portion_stack[j].value < *min) {
+			*min = p->portion_stack[j].value;
+			strncpy(min_label, p->portion_stack[j].name, MAX_NAME_LENGTH);
+		}
+
+		if (p->portion_stack[j].value > *max) {
+			*max = p->portion_stack[j].value;
+			strncpy(max_label, p->portion_stack[j].name, MAX_NAME_LENGTH);
+		}
+	}
+	*avg = *total/p->count_portions;
+	return 1;
+}
