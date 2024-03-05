@@ -11,15 +11,16 @@
 #include "./line_chart.h"
 #include "pie_chart.h"
 
-struct ChartFunctionTuple {
+struct GenericChart {
 	void *chart;
 	PlotFunction tart_function;
 	ChartType type;
+	short chart_color;
 };
 
 struct Tart {
 	int chart_count;
-	struct ChartFunctionTuple chart_list[MAX_CHARTS];
+	struct GenericChart chart_list[MAX_CHARTS];
 	Canvas *canvas;
 	WINDOW *window;
 };
@@ -89,7 +90,7 @@ tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function, ChartTyp
 	if (t->chart_count >= MAX_CHARTS)
 		return 0;
 
-	struct ChartFunctionTuple cft;
+	struct GenericChart cft;
 	cft.chart = chart;
 	cft.tart_function = tart_function;
 	cft.type = type;

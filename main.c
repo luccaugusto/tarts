@@ -32,12 +32,12 @@ static char doc[] = "Plot delicious Charts on the Terminal with T(CH)ARTS";
 static char args_doc[] = "[tarts]...";
 static struct argp_option options[] = {
 	/* arg name,         flag,  arg value     ,is optional,       description         */
-	{ "type"            , 't' ,  "chart type" ,     0     , "[bar/pie/line]"                },
-	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"         },
-	{ "labels"          , 'l' , "chart labels",     0     , "Csv list of strings for labels"},
-	{ "values"          , 'v' , "value list"  ,     0     , "Csv list of doubles for chart" },
-	{ "radius"          , 'r' , "radius value",     0     , "Value for pie chart radius"    },
-	{ "non interactive" , 'n' ,       0       ,     0     , "Disable interactive mode"      },
+	{ "type"            , 't' ,  "chart type" ,     0     , "[bar/pie/line]"                                             },
+	{ "color"           , 'c' ,  "color"      ,     0     , "Color for chart [blue/green/cyan/red/magenta/yellow/white]" },
+	{ "file"            , 'f' ,  "filename"   ,     0     , "Read charts from file"                                      },
+	{ "labels"          , 'l' , "chart labels",     0     , "Csv list of strings for labels"                             },
+	{ "values"          , 'v' , "value list"  ,     0     , "Csv list of doubles for chart"                              },
+	{ "non interactive" , 'n' ,       0       ,     0     , "Disable interactive mode"                                   },
 	{ 0 }
 };
 
@@ -197,7 +197,7 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 				percentage[j],
 				arguments->values[index].values[j],
 				arguments->labels[index].labels[j],
-				get_color()
+				(arguments->chart_colors[j] == BLANK_COLOR ? get_color() : arguments->chart_colors[j])
 			)
 		);
 	}
@@ -214,20 +214,23 @@ create_line_from_args(struct Arguments *arguments, int tarts_height, Tart *tart,
 			canvas_get_width(tart_get_canvas(tart)),
 			arguments->values[index].count_values
 			);
-	line_set_color(l, get_color());
+	line_set_color(l,
+		(arguments->chart_colors[index] == BLANK_COLOR ?
+			get_color() : arguments->chart_colors[index])
+	);
 	tart_add_chart(tart, l, print_line_chart, LINE_CHART);
 	return PLOT_OK;
 }
 
 PlotStatus
-create_bar_from_args(char* label, int value, int tarts_height, Tart *tart)
+create_bar_from_args(char* label, int value, int tarts_height, Tart *tart, short color)
 {
 	Bar *b = new_bar(
 		value,
 		label
 	);
 
-	bar_set_color(b, get_color());
+	bar_set_color(b, color);
 	tart_add_chart(tart, b, print_bar_chart, BAR_CHART);
 	return PLOT_OK;
 }
@@ -239,7 +242,14 @@ create_one_or_more_bar_from_args(struct Arguments *arguments, int tarts_height, 
 		return ERR_ARGS_COUNT_DONT_MATCH;
 
 	for (int j=0; j<arguments->values[index].count_values; ++j) {
-		create_bar_from_args(arguments->labels[index].labels[j], arguments->values[index].values[j], tarts_height, tart);
+		create_bar_from_args(
+			arguments->labels[index].labels[j],
+			arguments->values[index].values[j],
+			tarts_height,
+			tart,
+			(arguments->chart_colors[j] == BLANK_COLOR ?
+				get_color() : arguments->chart_colors[j])
+		);
 	}
 	return PLOT_OK;
 }
@@ -258,7 +268,7 @@ prepare_cmd_line_tarts(struct Arguments *arguments, double *max_value, int tarts
 			if (arguments->values[i].values[j] > *max_value)
 				*max_value = arguments->values[i].values[j];
 		}
-		switch (arguments->charts[i]) {
+		switch (arguments->chart_types[i]) {
 			case ARG_PIECHART:
 				ret_code = create_pie_from_args(arguments, tart, i);
 				break;
@@ -284,6 +294,8 @@ main(int argc, char *argv[])
 	arguments.values_count = 0;
 	arguments.charts_count = 0;
 	arguments.labels_count = 0;
+	arguments.colors_count = 0;
+	memset(arguments.chart_colors, BLANK_COLOR, sizeof(arguments.chart_colors));
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
