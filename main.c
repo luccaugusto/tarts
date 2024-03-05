@@ -43,24 +43,22 @@ static struct argp_option options[] = {
 
 /* TYPES */
 struct Arguments {
-	enum {NONE, ARG_PIECHART, ARG_LINECHART, ARG_BARCHART} charts[MAX_CHARTS];
+	enum {NONE, ARG_PIECHART, ARG_LINECHART, ARG_BARCHART} chart_types[MAX_CHARTS];
 	int charts_count;
 	struct LabelList labels[MAX_CHARTS];
 	int labels_count;
 	struct ValueList values[MAX_CHARTS];
 	int values_count;
 	int interactive;
-	int radius;
+	short chart_colors[MAX_CHARTS];
+	short colors_count;
 };
 
 /* FUNCTION DEFINITIONS */
 void
 show_cursor(int show)
 {
-	if (show)
-		curs_set(1);
-	else
-		curs_set(0);
+	curs_set(show ? TRUE : FALSE);
 }
 
 WINDOW *
@@ -146,24 +144,22 @@ show_footer_info(void)
 static error_t
 parse_opt(int key, char *arg, struct argp_state *state) {
     struct Arguments *arguments = state->input;
-	int radius;
     switch (key) {
 		case 'l': arguments->labels[arguments->labels_count++] = *parse_labels(arg);
 				  break;
+		case 'c': arguments->chart_colors[arguments->colors_count++] = get_color_by_name(arg[0]);
+				  break;
 		case 't': switch (arg[0]) {
-					  case 'p': arguments->charts[arguments->charts_count++] = ARG_PIECHART;
+					  case 'p': arguments->chart_types[arguments->charts_count++] = ARG_PIECHART;
 								break;
-					  case 'l': arguments->charts[arguments->charts_count++] = ARG_LINECHART;
+					  case 'l': arguments->chart_types[arguments->charts_count++] = ARG_LINECHART;
 								break;
 					  default:
-					  case 'b': arguments->charts[arguments->charts_count++] = ARG_BARCHART;
+					  case 'b': arguments->chart_types[arguments->charts_count++] = ARG_BARCHART;
 								break;
 				  }
 				  break;
 		case 'v': arguments->values[arguments->values_count++] = *parse_values(arg);
-				  break;
-		case 'r': radius = (int)str2double(arg);
-				  arguments->radius = radius > MAX_RADIUS ? MAX_RADIUS : radius;
 				  break;
 		case 'n': arguments->interactive = 0;
 		case ARGP_KEY_ARG:
@@ -186,8 +182,7 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 
 	Pie *p = new_pie(
 		canvas_get_height(tart_get_canvas(tart))/2.0,
-		canvas_get_width(tart_get_canvas(tart))/4.0,
-		arguments->radius
+		canvas_get_width(tart_get_canvas(tart))/4.0
 	);
 	/* calculate each value's percentage */
 	for (int j=0; j<arguments->values[index].count_values; ++j)
@@ -289,7 +284,6 @@ main(int argc, char *argv[])
 	arguments.values_count = 0;
 	arguments.charts_count = 0;
 	arguments.labels_count = 0;
-	arguments.radius = MAX_RADIUS;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 

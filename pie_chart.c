@@ -186,12 +186,12 @@ print_pie(void *p, struct Dimentions *dimentions, char *canvas_screen, Color *ca
 }
 
 Pie *
-new_pie(double center_y, double center_x, double radius)
+new_pie(double center_y, double center_x)
 {
 	Pie *p = malloc(sizeof(Pie));
 	p->center_x = center_x;
 	p->center_y = center_y;
-	p->radius = radius;
+	p->radius = MAX_RADIUS;
 	p->count_portions = 0;
 	p->color_map_color_count = 0;
 	for (int i=0; i<CIRCLE_DEGREE_COUNT; ++i )
