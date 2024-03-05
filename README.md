@@ -45,6 +45,6 @@ create a long line chart: ```./tart -t line -v "1,3,2,4,3,6,3,4,2,3,1" -l "tarts
 ## TODO:
 This is a list of the features being developed currently.
 
-+ Add command line color command
++ add default label values so that -l is optional
++ fix line charts using always first label
 + make create charts interactive command
-+ use ISO escape sequences
