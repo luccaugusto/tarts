@@ -1,6 +1,5 @@
 /* INCLUDES */
 #include <argp.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -214,6 +213,10 @@ create_pie_from_args(struct Arguments *arguments, Tart *tart, int index)
 PlotStatus
 create_line_from_args(struct Arguments *arguments, int tarts_height, Tart *tart, int index)
 {
+
+	if (!arguments->labels_count)
+		return ERR_ARGS_COUNT_DONT_MATCH;
+
 	Line *l = new_line(
 			arguments->values[index].values,
 			arguments->labels[index].labels[0],

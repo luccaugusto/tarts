@@ -1,7 +1,6 @@
 SHELL = /bin/sh
 .POSIX:
 
-# anote version
 VERSION = 1.0
 PROJ_NAME = tart
 
@@ -23,15 +22,21 @@ CC=gcc
 #cleaning program
 RM=rm -rf
 
-C_SRC=${wildcard ./*.c}
-H_SRC=${wildcard ./*.h}
-OBJ=${subst .c,.o,${subst ./,./build/,${C_SRC}}}
+C_SRC=${wildcard ./src/*.c}
+H_SRC=${wildcard ./src/*.h}
+OBJ=${subst .c,.o,${subst ./src/,./build/,${C_SRC}}}
 
 all: options BD_DIR ${PROJ_NAME}
 
 options:
 	@echo ${PROJ_NAME} build options:
 	@echo "CFLAGS = ${CFLAGS}"
+	@echo "SRC"
+	@echo ${C_SRC}
+	@echo "H"
+	@echo ${H_SRC}
+	@echo "OBJ"
+	@echo ${OBJ}
 	@echo
 
 ${PROJ_NAME}: ${OBJ}
@@ -48,11 +53,11 @@ config:
 	cp ./config.def.h ./$@.h
 	@echo
 
-./build/%.o: ./%.c ./%.h
+./build/%.o: ./src/%.c ./src/%.h
 	@echo "[${CC}] $<"
 	@ ${CC} $< -c ${CFLAGS} -o $@
 
-./build/main.o: ./main.c ${H_SRC}
+./build/main.o: ./src/main.c ${H_SRC}
 	@echo "[${CC}] $<"
 	@ ${CC} $< -c ${CFLAGS} -o $@
 
