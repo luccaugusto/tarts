@@ -9,7 +9,8 @@
 #include "./tart.h"
 #include "./prompt.h"
 #include "./line_chart.h"
-#include "pie_chart.h"
+#include "./pie_chart.h"
+#include "./bar_chart.h"
 
 struct GenericChart {
 	void *chart;
@@ -65,6 +66,27 @@ bake(struct Tart *tart)
 		);
 		return PLOT_OK;
 	}
+
+	// center bar charts
+	int bar_charts_length = 0;
+	for (int i=0; i<tart->chart_count; ++i) {
+		if (tart->chart_list[i].type == BAR_CHART) {
+			struct BarChart *b = (struct BarChart *) tart->chart_list[i].chart;
+			char *name = bar_get_name(b);
+			bar_charts_length += strlen(name);
+		}
+	}
+
+	if (bar_charts_length > 0) {
+		int bar_charts_offset_correction = (canvas_get_width(tart->canvas) - bar_charts_length) / 2;
+		for (int i=0; i<tart->chart_count; ++i) {
+			if (tart->chart_list[i].type == BAR_CHART) {
+				struct BarChart *b = (struct BarChart *) tart->chart_list[i].chart;
+				bar_set_offset(b, bar_get_offset(b) + bar_charts_offset_correction);
+			}
+		}
+	}
+
 
 	for (int i=0; i<tart->chart_count; ++i) {
 		status = tart->chart_list[i].tart_function(

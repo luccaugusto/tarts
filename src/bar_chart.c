@@ -87,6 +87,12 @@ bar_get_name (Bar *series)
 	return series->name;
 }
 
+int
+bar_get_offset (Bar *series)
+{
+	return series->x_offset;
+}
+
 void
 bar_set_number (Bar *series, double number)
 {
@@ -99,6 +105,12 @@ bar_set_name (Bar *series, char *name)
 	int len = (strlen(name) > MAX_NAME_LENGTH) ?
 		MAX_NAME_LENGTH : strlen(name);
 	strncpy(series->name, name, len);
+}
+
+void
+bar_set_offset (Bar *series, int offset)
+{
+	series->x_offset = offset;
 }
 
 Color
