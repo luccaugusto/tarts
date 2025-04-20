@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
 #include <ncurses.h>
 #include <string.h>
@@ -39,13 +40,43 @@ Stats *
 new_stats()
 {
 	Stats *s = malloc(sizeof(Stats));
+	if (s == NULL) {
+		return NULL;
+	}
+
 	s->avg = 0;
 	s->min = 0;
 	s->max = 0;
 	s->total = 0;
+	
 	s->min_label = malloc(sizeof(char) * MAX_NAME_LENGTH);
+	if (s->min_label == NULL) {
+		free(s);
+		return NULL;
+	}
+	
 	s->max_label = malloc(sizeof(char) * MAX_NAME_LENGTH);
+	if (s->max_label == NULL) {
+		free(s->min_label);
+		free(s);
+		return NULL;
+	}
+
+	// Initialize strings to empty
+	s->min_label[0] = '\0';
+	s->max_label[0] = '\0';
+	
 	return s;
+}
+
+void
+free_stats(Stats *s)
+{
+	if (s != NULL) {
+		free(s->min_label);
+		free(s->max_label);
+		free(s);
+	}
 }
 
 PlotStatus
@@ -131,8 +162,13 @@ tart_get_canvas(struct Tart *t)
 int
 tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function, ChartType type)
 {
-	if (t->chart_count >= MAX_CHARTS)
+	if (t == NULL || chart == NULL || tart_function == NULL) {
 		return 0;
+	}
+
+	if (t->chart_count >= MAX_CHARTS) {
+		return 0;
+	}
 
 	struct GenericChart cft;
 	cft.chart = chart;
@@ -146,9 +182,17 @@ tart_add_chart(struct Tart *t, void *chart, PlotFunction tart_function, ChartTyp
 void
 destroy_tart(struct Tart *t)
 {
-	for (int i=0; i<t->chart_count; ++i) {
-		free(t->chart_list[i].chart);
+	if (t == NULL) {
+		return;
 	}
+
+	for (int i = 0; i < t->chart_count; ++i) {
+		if (t->chart_list[i].chart != NULL) {
+			free(t->chart_list[i].chart);
+			t->chart_list[i].chart = NULL;
+		}
+	}
+	t->chart_count = 0;
 	free(t);
 }
 
@@ -172,43 +216,57 @@ void show_commands_panel(){return;}
 void
 show_tarts_stats(struct Tart *t)
 {
+	if (t == NULL) {
+		return;
+	}
+
 	char stats_string[MAX_NAME_LENGTH];
 	Stats *stats = new_stats();
+	if (stats == NULL) {
+		alert(tart_get_canvas(t), "Failed to allocate memory for stats", "Error", TRUE);
+		return;
+	}
 
-	for (int i=0; i<t->chart_count; ++i) {
+	for (int i = 0; i < t->chart_count; ++i) {
 		switch (t->chart_list[i].type) {
-			case LINE_CHART:;
+			case LINE_CHART: {
 				Line *l = (Line *)t->chart_list[i].chart;
-				line_get_stats(l, &stats->avg, &stats->min, &stats->max, &stats->total);
+				if (l != NULL) {
+					line_get_stats(l, &stats->avg, &stats->min, &stats->max, &stats->total);
+				}
 				break;
-			case PIE_CHART:;
+			}
+			case PIE_CHART: {
 				Pie *p = (Pie *)t->chart_list[i].chart;
-				pie_get_stats(p, &stats->avg, &stats->min, &stats->max, &stats->total, stats->min_label, stats->max_label);
+				if (p != NULL) {
+					pie_get_stats(p, &stats->avg, &stats->min, &stats->max, &stats->total, 
+								stats->min_label, stats->max_label);
+				}
 				break;
+			}
 			case BAR_CHART:
 				break;
 			default:
 				break;
 		}
-		snprintf(
-			stats_string,
-			MAX_NAME_LENGTH,
-			"AVG: %.2f, TOTAL: %.2f, MIN(%s): %.2f, MAX(%s): %2.f",
-			stats->avg,
-			stats->total,
-			stats->min_label,
-			stats->min,
-			stats->max_label,
-			stats->max
-		);
+
+		if (snprintf(stats_string, MAX_NAME_LENGTH,
+					"AVG: %.2f, TOTAL: %.2f, MIN(%s): %.2f, MAX(%s): %.2f",
+					stats->avg, stats->total, stats->min_label, stats->min,
+					stats->max_label, stats->max) >= MAX_NAME_LENGTH) {
+			alert(tart_get_canvas(t), "Stats string too long to display", "Error", TRUE);
+			break;
+		}
 		alert(tart_get_canvas(t), stats_string, "Your Tart Stats", TRUE);
 	}
+
+	free_stats(stats);
 }
 
 char *
 rotten_tarts(PlotStatus status)
 {
-	char *err_msg;
+	const char *err_msg;
 	switch (status) {
 		case ERR_CIRCLE_TOO_BIG:
 			err_msg = "Pie chart doesn't fit on canvas with that scale";
@@ -223,8 +281,12 @@ rotten_tarts(PlotStatus status)
 			err_msg = "Error";
 	}
 
-	char *err_msg_copy = malloc(sizeof(char) * (strlen(err_msg) + 1));
-	strncpy(err_msg_copy, err_msg, strlen(err_msg));
+	// Use strdup which handles allocation and copying safely
+	char *err_msg_copy = strdup(err_msg);
+	if (err_msg_copy == NULL) {
+		// If strdup fails, return a static string as fallback
+		return "Memory allocation error";
+	}
 
 	return err_msg_copy;
 }

@@ -120,9 +120,28 @@ canvas_get_colors_fg(struct Canvas *s)
 void
 destroy_canvas(struct Canvas *s)
 {
-	char *canvas = canvas_get_canvas(s);
-	if (canvas != NULL)
-		free(canvas);
+	if (s == NULL) {
+		return;
+	}
+
+	// Free canvas buffer
+	if (s->canvas != NULL) {
+		free(s->canvas);
+		s->canvas = NULL;
+	}
+
+	// Free color buffers
+	if (s->colors_fg != NULL) {
+		free(s->colors_fg);
+		s->colors_fg = NULL;
+	}
+
+	if (s->colors_bg != NULL) {
+		free(s->colors_bg);
+		s->colors_bg = NULL;
+	}
+
+	// Free the canvas structure itself
 	free(s);
 }
 
@@ -175,38 +194,77 @@ print_canvas(struct Canvas *c)
 void
 show_scale(struct Canvas *c)
 {
+	if (c == NULL) {
+		return;
+	}
+
 	char *canvas = canvas_get_canvas(c);
 	Color *colors_fg = canvas_get_colors_fg(c);
 	double scale = canvas_get_scale(c);
 	int height = canvas_get_height(c);
 	int width = canvas_get_width(c);
-	char *aux = malloc(sizeof(char) * MAX_NAME_LENGTH);
-
-	for (int y=0; y<height; y+=(2 / scale)) {
-		for (int x=0; x<width; ++x) {
-			canvas[y*width + x] = SCALE_BLOCK;
-			colors_fg[y*width + x] = COLOR_WHITE;
+	
+	// Allocate buffer for scale text with extra space for safety
+	char scale_text[MAX_NAME_LENGTH];
+	
+	// Calculate step size for scale markers, ensure it's at least 1
+	int step = (int)(2.0 / scale);
+	if (step < 1) step = 1;
+	
+	for (int y = 0; y < height; y += step) {
+		// Ensure we don't write beyond the canvas boundaries
+		if (y >= height) break;
+		
+		// Draw scale markers
+		for (int x = 0; x < width; ++x) {
+			if (y * width + x < height * width) {
+				canvas[y * width + x] = SCALE_BLOCK;
+				colors_fg[y * width + x] = COLOR_WHITE;
+			}
 		}
-		aux = int2str((height- y)/scale);
-		strncpy(&canvas[y*width], aux, strlen(aux));
+		
+		// Convert scale value to string safely
+		int scale_value = (int)((height - y) / scale);
+		int written = snprintf(scale_text, MAX_NAME_LENGTH, "%d", scale_value);
+		
+		// Only write if we have enough space and the conversion succeeded
+		if (written > 0 && written < MAX_NAME_LENGTH && y * width + written <= height * width) {
+			strncpy(&canvas[y * width], scale_text, written);
+		}
 	}
 }
 
 void
 show_canvas(struct Canvas *c, WINDOW *w)
 {
+	if (c == NULL || w == NULL) {
+		return;
+	}
+
 	int height = canvas_get_height(c);
 	int width = canvas_get_width(c);
 	char *canvas = canvas_get_canvas(c);
 	Color *colors_fg = canvas_get_colors_fg(c);
 	Color *colors_bg = canvas_get_colors_bg(c);
 
-	for (int y=0; y<height; ++y) {
-		for (int x=0; x<width; ++x) {
-			setcolor(colors_fg[y * width + x], colors_bg[y * width + x], w);
+	// Validate all pointers and dimensions
+	if (canvas == NULL || colors_fg == NULL || colors_bg == NULL || 
+		height <= 0 || width <= 0) {
+		return;
+	}
+
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			int index = y * width + x;
+			if (index >= height * width) {
+				continue;  // Skip if we're out of bounds
+			}
+
+			// Set colors and print character
+			setcolor(colors_fg[index], colors_bg[index], w);
 			/* offset printing because of borders */
-			mvwprintw(w,y+1, x+1, "%c", canvas[y * width + x] );
-			unsetcolor(colors_fg[y * width + x], colors_bg[y * width + x], w);
+			mvwprintw(w, y + 1, x + 1, "%c", canvas[index]);
+			unsetcolor(colors_fg[index], colors_bg[index], w);
 		}
 	}
 }
@@ -214,27 +272,70 @@ show_canvas(struct Canvas *c, WINDOW *w)
 void
 canvas_clear(struct Canvas *s)
 {
-	char *c = s->canvas;
-	int n = canvas_get_height(s) * canvas_get_width(s) - 1;
-	int nfg = n;
-	int nbg = n;
-	while (n >= 0) c[n--] = BLANK;
-	while (nfg >= 0) s->colors_fg[nfg--] = COLOR_BLANK;
-	while (nbg >= 0) s->colors_fg[nbg--] = COLOR_BLANK;
+	if (s == NULL || s->canvas == NULL || s->colors_fg == NULL || s->colors_bg == NULL) {
+		return;
+	}
+
+	int size = canvas_get_height(s) * canvas_get_width(s);
+	if (size <= 0) {
+		return;
+	}
+
+	// Clear canvas buffer
+	memset(s->canvas, BLANK, size);
+	
+	// Clear color buffers
+	memset(s->colors_fg, COLOR_BLANK, size * sizeof(Color));
+	memset(s->colors_bg, COLOR_BLANK, size * sizeof(Color));
 }
 
 struct Canvas *
 new_canvas(int height, int width)
 {
-	struct Canvas *s = malloc(sizeof(struct Canvas));
-	canvas_set_height(s, height);
-	canvas_set_width(s, width);
-	canvas_set_scale(s, 1);
-	s->canvas = malloc(sizeof(char) * (height) * (width));
-	s->colors_fg = malloc(sizeof(int) * (height) * (width));
-	s->colors_bg = malloc(sizeof(int) * (height) * (width));
-	s->show_scale = 0;
+	// Validate input parameters
+	if (height <= 0 || width <= 0) {
+		return NULL;
+	}
 
+	struct Canvas *s = malloc(sizeof(struct Canvas));
+	if (s == NULL) {
+		return NULL;
+	}
+
+	// Initialize all members to safe values
+	s->show_scale = 0;
+	s->canvas = NULL;
+	s->colors_fg = NULL;
+	s->colors_bg = NULL;
+	s->dimentions.height = height;
+	s->dimentions.width = width;
+	s->dimentions.scale = 1.0;
+
+	// Allocate canvas buffer
+	s->canvas = malloc(sizeof(char) * height * width);
+	if (s->canvas == NULL) {
+		free(s);
+		return NULL;
+	}
+
+	// Allocate foreground colors buffer
+	s->colors_fg = malloc(sizeof(Color) * height * width);
+	if (s->colors_fg == NULL) {
+		free(s->canvas);
+		free(s);
+		return NULL;
+	}
+
+	// Allocate background colors buffer
+	s->colors_bg = malloc(sizeof(Color) * height * width);
+	if (s->colors_bg == NULL) {
+		free(s->colors_fg);
+		free(s->canvas);
+		free(s);
+		return NULL;
+	}
+
+	// Initialize all buffers to safe values
 	canvas_clear(s);
 
 	return s;
